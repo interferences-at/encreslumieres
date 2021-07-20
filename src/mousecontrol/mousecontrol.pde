@@ -37,7 +37,7 @@ color color_sent;
 
 void setup()
 {
-  size(640, 480);
+  size(720, 480);
   frameRate(30);
   // start oscP5, listening for incoming messages at a given port
   osc_receiver = new OscP5(this, OSC_RECEIVE_PORT);
@@ -76,7 +76,7 @@ public void controlEvent(ControlEvent c)
     int g = int(c.getArrayValue(1));
     int b = int(c.getArrayValue(2));
     int a = int(c.getArrayValue(3));
-    color col = color(r, g, b, a);
+    // color col = color(r, g, b, a);
     send_color(r, g, b); // TODO: a
     // println("event\talpha:"+a+"\tred:"+r+"\tgreen:"+g+"\tblue:"+b+"\tcol"+col);
   }
@@ -234,17 +234,55 @@ void send_force()
 {
   OscMessage message = new OscMessage("/" + current_identifier + "/raw");
   // message.add(current_identifier);
+  
+  // Typetags: ffffffffffffffffffffff (22 floats)
+  
+  // Indices 0-4:
+  message.add(0.0);
+  message.add(0.0);
+  message.add(0.0);
+  message.add(0.0);
+  message.add(0.0);
+  
+  // Indices 5-9:
+  message.add(0.0);
+  message.add(0.0);
+  message.add(0.0);
+  message.add(0.0);
+  message.add(0.0);
+  
+  // Index 10-11:
+  message.add(0.0);
+  message.add(0.0);
+  
   if (force_is_pressed)
   {
-    message.add(FORCE_IF_PRESSED);
+    message.add((float) FORCE_IF_PRESSED);
   }
   else
   {
-    message.add(FORCE_IF_NOT_PRESSED);
+    message.add((float) FORCE_IF_NOT_PRESSED);
   }
+
+  // Indices 13-14:
+  message.add(0.0);
+  message.add(0.0);
+  
+  // Indices 15-19
+  message.add(0.0);
+  message.add(0.0);
+  message.add(0.0);
+  message.add(0.0);
+  message.add(0.0);
+  
+  // Index 20-21:
+  message.add(0.0);
+  message.add(0.0);
+  
   if (VERBOSE)
   {
     println("/" + current_identifier + "/raw " + current_identifier + " " + "?");
   }
+  
   osc_receiver.send(message, osc_send_address);
 }
