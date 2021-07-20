@@ -1,15 +1,15 @@
-OSC message signatures for Encres & Lumieres
-============================================
+# OSC message signatures for Encres & Lumieres
+
 Notes:
 * Use 0 for the default spray identifier. (the one controlled by the mouse)
 * Often, either float or int arguments are accepted. (but they must all be either float or int)
 
 
-blob
-----
+## blob
+
 Signatures:
-* /blob ,ifff
-* /blob ,iiii
+* `/blob ,ifff`
+* `/blob ,iiii`
 
 Arguments:
 * Argument 1: spray identifier.
@@ -23,11 +23,11 @@ position moves around the brush.
 See the blobdetective software.
 
 
-force
------
+## force
+
 Signatures:
-* /force ,if
-* /force ,ii
+* `/force ,if`
+* `/force ,ii`
 
 Arguments:
 * Argument 1: spray identifier.
@@ -37,11 +37,11 @@ Description:
 The force is used as an on/off controller for painting.
 
 
-color
------
+## color
+
 Signatures:
-* /color ,iffff
-* /color ,iiiii
+* `/color ,iffff`
+* `/color ,iiiii`
 
 Arguments:
 * Argument 1: spray identifier.
@@ -54,11 +54,11 @@ Description:
 Sets the color of a brush.
 
 
-brush weight
-------------
+## brush weight
+
 Signatures:
-* /brush/weight ,ii
-* /brush/weight ,if
+* `/brush/weight ,ii`
+* `/brush/weight ,if`
 
 Arguments:
 * Argument 1: spray identifier.
@@ -67,11 +67,11 @@ Arguments:
 Description:
 Sets the weight of a brush.
 
-brush choice
-------------
+## brush choice
+
 Signatures:
-* /brush/choice ,ii
-* /brush/choice ,if
+* `/brush/choice ,ii`
+* `/brush/choice ,if`
 
 Arguments:
 * Argument 1: spray identifier.
@@ -85,10 +85,10 @@ Brush 0 is a point shader. Brush 1, 2, 3, etc. are PNG files, randomly rotated.
 Brush 14 is an eraser. The size of the eraser is the same as the brushes.
 
 
-undo
-----
+## undo
+
 Signature:
-* /undo ,i
+`/undo ,i`
 
 Arguments:
 * Argument 1: spray identifier.
@@ -97,10 +97,10 @@ Description:
 Undos the last stroke that ended.
 
 
-redo
-----
+## redo
+
 Signature:
-* /redo ,i
+`/redo ,i`
 
 Arguments:
 * Argument 1: spray identifier.
@@ -109,10 +109,10 @@ Description:
 Redos the last thing undone. (see /undo)
 
 
-set force threshold
---------------------
+## set force threshold
+
 Signature:
-* /set/force/threshold ,i
+`/set/force/threshold ,i`
 
 Arguments:
 * Argument 1: value
@@ -122,10 +122,10 @@ Changes the FSR sensor on/off threshold value.
 It's the same for all spray cans.
 
 
-set step size
--------------
+## set step size
+
 Signature:
-/set/step_size, if
+`/set/step_size, if`
 
 Arguments:
 * Argument 1: spray identifier
@@ -134,10 +134,10 @@ Description:
 Sets the minimum distance between interpolated positions of nodes. (in pixels)
 
 
-scale factor
-------------
+## scale factor
+
 Signature:
-/scale/factor, if
+`/scale/factor, if`
 
 Arguments:
 * Argument 1: spray identifier
@@ -150,10 +150,10 @@ A scale factor of 1.0 means that we use the full sketch area.
 A scale factor of 0.1 means that we can only paint in 1/10 of the sketch area.
 
 
-scale center
-------------
+## scale center
+
 Signature:
-/scale/center, iff
+`/scale/center, iff`
 
 Arguments:
 * Argument 1: spray identifier
@@ -167,10 +167,10 @@ For the Y scale, 0.0 is the top of the sketch and 1.0 is the bottom.
 For the X scale, 0.0 is the left of the sketch and 1.0 is the right.
 
 
-layer
-------------
+## layer
+
 Signature:
-/layer ,ii
+`/layer ,ii`
 
 Arguments:
 * Argument 1: spray identifier
@@ -183,10 +183,10 @@ If the layer of a spray is 9, it will be drawn over all spray cans whose layer
 number if smaller than 9.
 
 
-link strokes
-------------
+## link strokes
+
 Signature:
-/link_strokes ,ii
+`/link_strokes ,ii`
 
 Arguments:
 * Argument 1: spray identifier

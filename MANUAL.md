@@ -1,8 +1,8 @@
-Encres & Lumières - User Manual
-===============================
+# Encres & Lumières - User Manual
 
-Brushes
--------
+
+## Brushes
+
 * 00 Eraser
 * 01 BizzareSplat_64x64.png
 * 02 DoubleSpot_64x64.png
@@ -20,8 +20,8 @@ Brushes
 * 14 Eraser
 
 
-How to draw straight lines
---------------------------
+## How to draw straight lines
+
 * Make a spot - a stroke that has only a few nodes
 * Make another dot - and press hard on the force sensor.
 
@@ -29,3 +29,4 @@ It will create a straight line between the two dots.
 Make many lines if you want to make it darker.
 
 Press very hard and suddenly on the force sensor.
+

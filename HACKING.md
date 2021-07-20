@@ -1,5 +1,5 @@
-Contributing to this Project
-============================
+# Contributing to this Project
+
 Coding style, etc. There are also a few performance tips in here.
 
 This file describes some development practices and coding standards for this project. Its syntax follows the rst format.
@@ -13,45 +13,45 @@ This file describes some development practices and coding standards for this pro
     Free Documentation License".
 
 
-Version Number
---------------
+## Version Number
+
 We follow semantic versioning 2.0.
 http://semver.org/
 
 The following files contain the version number:
 
-* src/encreslumieres/encreslumieres.pde
-* NEWS.txt
+- src/encreslumieres/encreslumieres.pde
+- NEWS.md
 
 
-The Release Process
--------------------
-Create branch release-x.y.z from develop.
-Make sure the NEWS.txt file is up-to-date.
-Make sure the version number in all the files with the version number is correct.
-Commit any pending changes.
-Merge into master.
-Create the tag in git.
-Create a x.y branch if needed.
-Go back to your release-x.y.z branch.
-Update the version number in NEWS.txt and all files.
-Commit any pending changes.
-Merge into develop.
-Push all branches, with tags.
+## The Release Process
+
+- Create branch release-x.y.z from dev.
+- Make sure the NEWS.md file is up-to-date.
+- Make sure the version number in all the files with the version number is correct.
+- Commit any pending changes.
+- Merge into master.
+- Create the tag in git.
+- Create a x.y branch if needed.
+- Go back to your release-x.y.z branch.
+- Update the version number in NEWS.md and all files.
+- Commit any pending changes.
+- Merge into dev.
+- Push all branches, with tags.
 
 
-The NEWS.txt file
------------------
+## The NEWS.md file
+
 The NEWS file contains all the release notes. We list there the bugs fixed and the new features. We also explain the reason for some changes if needed.
 
 
-The README.txt File
--------------------
+## The README.md File
+
 See it.
 
 
-List of pde files
------------------
+## List of pde files
+
 Here is a short description of each file:
 
 * src/encreslumieres/encreslumieres.pde - The main file.
@@ -60,13 +60,8 @@ Here is a short description of each file:
 * src/encreslumieres/SprayManager.pde - One spray can. Contains many paths.
 
 
-Historic
---------
-To do.
+## Coding style
 
-
-Coding style
-------------
 Let's now describe a bit the Java coding style in this project.
 
  * variables should be lowercase words, separated by underscores. Like "egg_spam".
@@ -82,15 +77,15 @@ Let's now describe a bit the Java coding style in this project.
  * Declare local variables as close as possible to where they are used, not in the beginning of the method.
 
 
-Libraries we use
-----------------
+## Libraries we use
+
  * oscP5
  * Syphon / Spout
  * controlP5
 
 
-Optimization
-------------
+## Optimization
+
 What can make this sketch use less CPU, hence be faster:
 
 * make the step size bigger (5 pixels works well)
@@ -100,3 +95,4 @@ What can make this sketch use less CPU, hence be faster:
 * have less brushes
 * we could change the code to use P3D renderer for the PGraphics in SprayCan, 
   but then the brush will make the sketch look bad when we redraw over it.
+

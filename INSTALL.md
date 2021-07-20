@@ -1,5 +1,5 @@
-Installation instructions
-=========================
+# Installation instructions
+
 To use this project, in short:
 * Download Processing
 * Install blobdetective on GNU/Linux. Use it with a modified PlayStation3
@@ -14,12 +14,12 @@ To use this project, in short:
   file of the Processing sketch.
 
 
-Install blobdetective
----------------------
+## Install blobdetective
+
 See https://github.com/interferences-at/blobdetective
 
-Processing
-----------
+## Processing
+
 Download it from the web site.
 
 In the Sketch menu, choose manage libraries...
@@ -31,15 +31,15 @@ Download and install the following libraries:
 * controlP5
 
 
-Ubuntu 15.10
-------------
-Processing
-~~~~~~~~~~
+## Ubuntu 15.10
+
+### Processing
+
 Download it from the web site.
 
 
-GStreamer
-~~~~~~~~~
+### GStreamer
+
 Needed for Processing to work correctly. Yes, they use the old
 GStreamer 0.10 version.::
 
@@ -50,8 +50,8 @@ Try a pipeline::
   ls -l /dev/video*
   gst-launch-0.10 v4l2src device=/dev/video1 ! ffmpegcolorspace ! video/x-raw-rgb, width=640, height=480, bpp=32, depth=24 ! ximagesink
 
-Arduino
--------
+## Arduino
+
 * Start the Arduino IDE and open the Preferences window.
 * Enter the following URL: http://arduino.esp8266.com/package_esp8266com_index.json 
   into Additional Board Manager URLs field.

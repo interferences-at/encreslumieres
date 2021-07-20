@@ -1,5 +1,5 @@
-Encres & lumières
-==================
+# Encres & lumières
+
 OSC-controlled video spray painting.
 
 License: GPL
@@ -15,18 +15,19 @@ With code from:
 * Ian McEwan - Ashima Arts
 * Maxime Damecour
 
-Installation instructions
--------------------------
-See INSTALL.txt
+## Installation instructions
 
-OSC messages
-------------
-See OSC.txt
+See INSTALL.md
 
-Release notes
--------------
-See NEWS.txt
+## OSC messages
 
-Contributing
-------------
-See HACKING.txt
+See OSC.md
+
+## Release notes
+
+See NEWS.md
+
+## Contributing
+
+See HACKING.md
+
