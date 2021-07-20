@@ -19,9 +19,8 @@ final int MAX_BRUSH_WEIGHT = 200;
 final int BRUSH_WEIGHT_STEP = 10;
 final int DEFAULT_IDENTIFIER = 0;
 final boolean VERBOSE = false;
-// FIXME: if force < 400, it means it's pressed. Counter-intuitive, I know.
 final int FORCE_IF_PRESSED = 800;
-final int FORCE_IF_NOT_PRESSED = 1023;
+final int FORCE_IF_NOT_PRESSED = 0;
 final float BRUSH_SCALE = 0.3; // FIXME: ratio taken from Knot.pde (not quite right)
 
 ControlP5 control_p5;
@@ -29,11 +28,11 @@ ColorPicker color_picker;
 NetAddress osc_send_address;
 OscP5 osc_receiver;
 boolean force_is_pressed = false;
-float blob_x = 0.0;
-float blob_y = 0.0;
-float blob_size = 100.0;
+int blob_x = 0;
+int blob_y = 0;
+int blob_size = 100;
 int brush_weight = 100;
-int current_identifier = 0;
+int current_identifier = 1;
 color color_sent;
 
 void setup()
@@ -104,7 +103,7 @@ void draw_head_up_display()
   text("Send to osc.udp://" + OSC_SEND_HOST + ":" + OSC_SEND_PORT, x_pos, 20);
   text("/blob " + current_identifier + " " + blob_x + " " + blob_y + " " + blob_size, x_pos, 40);
   text("/brush/weight " + current_identifier + " " + brush_weight, x_pos, 60);
-  text("/force " + current_identifier + " " + force_value, x_pos, 80);
+  text("/" + current_identifier + "/raw " + force_value + " (force)", x_pos, 80);
   text("/color " + current_identifier + " " + red(color_sent) + " " + green(color_sent) + " " + blue(color_sent), x_pos, 100);
 }
 
@@ -233,8 +232,8 @@ void send_brush_weight()
 
 void send_force()
 {
-  OscMessage message = new OscMessage("/force");
-  message.add(current_identifier);
+  OscMessage message = new OscMessage("/" + current_identifier + "/raw");
+  // message.add(current_identifier);
   if (force_is_pressed)
   {
     message.add(FORCE_IF_PRESSED);
@@ -245,7 +244,7 @@ void send_force()
   }
   if (VERBOSE)
   {
-    println("/force " + current_identifier + " " + "?");
+    println("/" + current_identifier + "/raw " + current_identifier + " " + "?");
   }
   osc_receiver.send(message, osc_send_address);
 }
