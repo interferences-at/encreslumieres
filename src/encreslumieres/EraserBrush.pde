@@ -1,5 +1,5 @@
 /**
- * Nice round eraser.
+ * Round eraser.
  */
 class EraserBrush extends Brush
 {

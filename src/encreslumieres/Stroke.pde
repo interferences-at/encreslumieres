@@ -1,4 +1,6 @@
 /**
+ * One stroke we draw with a paintbrush.
+ *
  * Each stroke/path contains a list of points/knots/nodes.
  */
 class Stroke

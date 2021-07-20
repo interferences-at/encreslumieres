@@ -2,7 +2,6 @@ import netP5.NetAddress;
 import oscP5.OscMessage;
 import oscP5.OscP5;
 
-
 final String VERSION = "1.0.1";
 
 /**
@@ -25,7 +24,7 @@ class App
   // private constants
   private final int OSC_SEND_PORT = 13333;
   private final String OSC_SEND_HOST = "127.0.0.1";
-  private final int BLOB_INPUT_WIDTH = 640; // The PS3 Eye camera is 640x480
+  private final int BLOB_INPUT_WIDTH = 720; // The PS3 Eye camera is 640x480
   private final int BLOB_INPUT_HEIGHT = 480; // and blobdetective sends us the blob position in that range
   private final int NUM_SPRAY_CANS = 6; // maximum number of spraycans - not too many is more optimized
   private final int MOUSE_GRAFFITI_IDENTIFIER = 0; // the index of the mouse spraycan
@@ -40,12 +39,12 @@ class App
    * 400, the brush will be on. this._force_threshold is what you will
    * need to change often. See below.
    */
-  final int FORCE_MAX = 1023; // DO NOT change this
-  int _force_threshold = 50; // Please change this! FSR threshold. (FSR is in the range [0,1023]
+  final int FORCE_MAX = 1700; // DO NOT change this
+  int _force_threshold = 300; // Please change this! FSR threshold. (FSR is in the range [0,1023]
 
   // private attributes
   private boolean _verbose = false;
-  private int _osc_receive_port = 31340;
+  private int _osc_receive_port = 8887;
   private int _width = 640; // window width
   private int _height = 480; // window height
   // private PGraphics _test_buffer = null;
@@ -61,7 +60,7 @@ class App
   float MINIMUM_ALPHA = 0.0; // Here is the min/max alpha ratio according to force FSR pressure sensor
   float MAXIMUM_ALPHA = 0.6;
   int MAX_LAYER = 10;
-
+  
   /**
    * Constructor.
    * 
@@ -531,7 +530,7 @@ class App
   /**
    * Handles /blob OSC messages.
    */
-  private void handle_blob(int spray_can_index, float x, float y, float size)
+  private void handle_blob(int spray_can_index, int x, int y, int size)
   {
     if (this.has_can_index(spray_can_index))
     {
@@ -579,7 +578,7 @@ class App
    * Given a force amount (from the FSR sensor)
    * it converts it to a boolean: is pressed or not.
    */
-  private boolean _force_to_is_pressed(int force)
+  private boolean _force_to_is_pressed(float force)
   {
     boolean ret = false;
     if (force > this._force_threshold)
@@ -592,15 +591,20 @@ class App
   /**
    * Handles /force OSC messages.
    */
-  private void handle_force(int spray_can_index, int force)
+  private void handle_force(int spray_can_index, float force)
   {
     // Invert the number (only once here)
-    force = FORCE_MAX - force;
+    //force = FORCE_MAX - force;
+     
     
     if (this.has_can_index(spray_can_index))
     {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
       if (this.debug_force)
+      
+      //println("FORCE: " + force);
+     //println("INDEX: " + spray_can_index);
+      
       {
         println("FORCE: " + force);
       }
@@ -768,20 +772,17 @@ class App
     //print("Received " + message.addrPattern() + " " + message.typetag() + "\n");
     
     // ---  /force ---
-    if (message.checkAddrPattern("/force"))
+    if (message.checkAddrPattern("/1/raw"))
     {
       // TODO: parse string identifier as a first OSC argument
-      int force = 0;
-      if (message.checkTypetag("ii"))
+      float force = 0;
+      if (message.checkTypetag("ffffffffffffffffffffff"))
       {
-        identifier = message.get(0).intValue();
-        force = message.get(1).intValue();
+        identifier = 1;
+        force = message.get(12).floatValue();
+        //println(force);
       }
-      else if (message.checkTypetag("if"))
-      {
-        identifier = message.get(0).intValue();
-        force = (int) message.get(1).floatValue();
-      }
+      
       else
       {
         println("Wrong OSC typetags for /force.");
@@ -791,18 +792,107 @@ class App
       this.handle_force(identifier, force);
     }
     
+    
+    
+    if (message.checkAddrPattern("/2/raw"))
+    {
+      // TODO: parse string identifier as a first OSC argument
+      float force = 0;
+      if (message.checkTypetag("ffffffffffffffffffffff"))
+      {
+        identifier = 2;
+        force = message.get(12).floatValue();
+        //println(force);
+      }
+      
+      else
+      {
+        println("Wrong OSC typetags for /force.");
+        // we use to support only the value - no identifier, but
+        // not anymore
+      }
+      this.handle_force(identifier, force);
+    }
+    
+    
+    
+    if (message.checkAddrPattern("/3/raw"))
+    {
+      // TODO: parse string identifier as a first OSC argument
+      float force = 0;
+      if (message.checkTypetag("ffffffffffffffffffffff"))
+      {
+        identifier = 3;
+        force = message.get(12).floatValue();
+        //println(force);
+      }
+      
+      else
+      {
+        println("Wrong OSC typetags for /force.");
+        // we use to support only the value - no identifier, but
+        // not anymore
+      }
+      this.handle_force(identifier, force);
+    }
+    
+    
+    
+    if (message.checkAddrPattern("/4/raw"))
+    {
+      // TODO: parse string identifier as a first OSC argument
+      float force = 0;
+      if (message.checkTypetag("ffffffffffffffffffffff"))
+      {
+        identifier = 4;
+        force = message.get(12).floatValue();
+        //println(force);
+      }
+      
+      else
+      {
+        println("Wrong OSC typetags for /force.");
+        // we use to support only the value - no identifier, but
+        // not anymore
+      }
+      this.handle_force(identifier, force);
+    }
+    
+    
+    
+    if (message.checkAddrPattern("/5/raw"))
+    {
+      // TODO: parse string identifier as a first OSC argument
+      float force = 0;
+      if (message.checkTypetag("ffffffffffffffffffffff"))
+      {
+        identifier = 5;
+        force = message.get(12).floatValue();
+        //println(force);
+      }
+      
+      else
+      {
+        println("Wrong OSC typetags for /force.");
+        // we use to support only the value - no identifier, but
+        // not anymore
+      }
+      this.handle_force(identifier, force);
+    }
+    
+    
     // ---  /blob ---
     else if (message.checkAddrPattern("/blob"))
     {
-      float x = 0.0;
-      float y = 0.0;
-      float size = 0.0;
-      if (message.checkTypetag("ifff"))
+      int x = 0;
+      int y = 0;
+      int size = 0;
+      if (message.checkTypetag("iiii"))
       {
         identifier = message.get(0).intValue();
-        x = message.get(1).floatValue();
-        y = message.get(2).floatValue();
-        size = message.get(3).floatValue();
+        x = message.get(1).intValue();
+        y = message.get(2).intValue();
+        size = message.get(3).intValue();
       }
       else
       {

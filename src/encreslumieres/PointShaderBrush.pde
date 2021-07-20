@@ -1,3 +1,6 @@
+/**
+ * Brush that paints with a shader.
+ */
 class PointShaderBrush extends Brush
 {
   private PShader _point_shader;

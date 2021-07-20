@@ -1,3 +1,6 @@
+/**
+ * A command is an action to do by the program.
+ */
 abstract class Command
 {
   private int _spray_can_index;
@@ -6,6 +9,7 @@ abstract class Command
   {
     this._spray_can_index = spray_can_index;
   }
+  
   
   public int get_spray_can_index()
   {

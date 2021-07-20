@@ -1,3 +1,6 @@
+/**
+ * A brush allows one to draw on the screen.
+ */
 abstract class Brush
 {
   public Brush()

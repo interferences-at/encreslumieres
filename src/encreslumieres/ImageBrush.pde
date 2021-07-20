@@ -1,3 +1,6 @@
+/**
+ * Brush that fills with an image.
+ */
 class ImageBrush extends Brush
 {
   ArrayList<PImage> _images;

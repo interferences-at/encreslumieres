@@ -7,8 +7,7 @@ class SprayCan
   private final float DEFAULT_STEP_SIZE = 1.0; // how many pixels between each brush drawn - interpolated. See PointShaderBrush
   private final float DEFAULT_BRUSH_WEIGHT = 64; // size of the brush in pixels
   private final int NUMBER_OF_UNDO_LEVELS = 5;
-  
-  
+
   // attributes
   private ArrayList<Stroke> _strokes; // Lists of nodes - to be drawn only once
   private color _color; // Current color

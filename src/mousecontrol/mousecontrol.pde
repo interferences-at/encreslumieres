@@ -12,7 +12,7 @@ import controlP5.ControlEvent;
 import controlP5.ColorPicker;
 
 final int OSC_RECEIVE_PORT = 31232;
-final int OSC_SEND_PORT = 31340;
+final int OSC_SEND_PORT = 8888;
 final String OSC_SEND_HOST = "127.0.0.1";
 final int MIN_BRUSH_WEIGHT = 40;
 final int MAX_BRUSH_WEIGHT = 200;

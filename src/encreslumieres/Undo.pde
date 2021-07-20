@@ -1,3 +1,6 @@
+/**
+ * Manages the undo stack.
+ */
 class Undo
 {
   // Number of currently available undo and redo snapshots

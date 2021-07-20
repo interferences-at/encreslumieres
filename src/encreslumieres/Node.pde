@@ -1,8 +1,10 @@
 /**
  * One node in a path.
+ *
+ * Paths contain a list of point coordinates.
  */
 class Node extends PVector
-{  
+{
   private float _size;
   private color _color;
   private float _angle;  

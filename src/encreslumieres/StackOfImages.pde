@@ -1,3 +1,6 @@
+/**
+ * List of images we can use to paint.
+ */
 class StackOfImages
 {
   private int _amount;
