@@ -776,6 +776,7 @@ class App
     {
       // TODO: parse string identifier as a first OSC argument
       float force = 0;
+      
       if (message.checkTypetag("ffffffffffffffffffffff"))
       {
         identifier = 1;
@@ -785,7 +786,7 @@ class App
       
       else
       {
-        println("Wrong OSC typetags for /force.");
+        println("Wrong OSC typetags for /1/raw: " + message.typetag());
         // we use to support only the value - no identifier, but
         // not anymore
       }
@@ -794,7 +795,7 @@ class App
     
     
     
-    if (message.checkAddrPattern("/2/raw"))
+    else if (message.checkAddrPattern("/2/raw"))
     {
       // TODO: parse string identifier as a first OSC argument
       float force = 0;
@@ -807,7 +808,7 @@ class App
       
       else
       {
-        println("Wrong OSC typetags for /force.");
+        println("Wrong OSC typetags for /2/raw: " + message.typetag());
         // we use to support only the value - no identifier, but
         // not anymore
       }
@@ -816,7 +817,7 @@ class App
     
     
     
-    if (message.checkAddrPattern("/3/raw"))
+    else if (message.checkAddrPattern("/3/raw"))
     {
       // TODO: parse string identifier as a first OSC argument
       float force = 0;
@@ -829,7 +830,7 @@ class App
       
       else
       {
-        println("Wrong OSC typetags for /force.");
+        println("Wrong OSC typetags for /3/raw: " + message.typetag());
         // we use to support only the value - no identifier, but
         // not anymore
       }
@@ -838,7 +839,7 @@ class App
     
     
     
-    if (message.checkAddrPattern("/4/raw"))
+    else if (message.checkAddrPattern("/4/raw"))
     {
       // TODO: parse string identifier as a first OSC argument
       float force = 0;
@@ -851,7 +852,7 @@ class App
       
       else
       {
-        println("Wrong OSC typetags for /force.");
+        println("Wrong OSC typetags for /4/raw: " + message.typetag());
         // we use to support only the value - no identifier, but
         // not anymore
       }
@@ -860,7 +861,7 @@ class App
     
     
     
-    if (message.checkAddrPattern("/5/raw"))
+    else if (message.checkAddrPattern("/5/raw"))
     {
       // TODO: parse string identifier as a first OSC argument
       float force = 0;
@@ -873,7 +874,7 @@ class App
       
       else
       {
-        println("Wrong OSC typetags for /force.");
+        println("Wrong OSC typetags for /5/raw: "  + message.typetag());
         // we use to support only the value - no identifier, but
         // not anymore
       }
@@ -896,7 +897,7 @@ class App
       }
       else
       {
-        println("Wrong OSC typetags for /blob.");
+        println("Wrong OSC typetags for /blob: "  + message.typetag());
       }
       this.handle_blob(identifier, x, y, size);
     }
@@ -933,7 +934,7 @@ class App
       }
       else
       {
-        println("Wrong OSC typetags for /color.");
+        println("Wrong OSC typetags for /color: " + message.typetag());
       }
       this.handle_color(identifier, r, g, b, a);
     }
@@ -954,7 +955,7 @@ class App
       }
       else
       {
-        println("Wrong OSC typetags for /brush/weight.");
+        println("Wrong OSC typetags for /brush/weight: " + message.typetag());
       }
       this.handle_brush_weight(identifier, weight);
     }
@@ -970,7 +971,7 @@ class App
       }
       else
       {
-        println("Wrong OSC typetags for /brush/choice.");
+        println("Wrong OSC typetags for /brush/choice: " + message.typetag());
       }
       this.handle_brush_choice(identifier, brush_choice);
     }
