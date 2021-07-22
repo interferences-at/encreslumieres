@@ -19,8 +19,7 @@ final String VERSION = "1.0.1";
  * - z: undo 
  * - r: redo
  */
-class App
-{
+class App {
   // private constants
   private final int OSC_SEND_PORT = 13333;
   private final String OSC_SEND_HOST = "127.0.0.1";
@@ -66,8 +65,7 @@ class App
    * 
    * See this.setup_cb() for more initialization. (OSC receiver, etc.)
    */
-  public App()
-  {
+  public App() {
     this._brushes = new ArrayList<Brush>();
     this._commands = new ArrayList<Command>();
     this._load_brushes();
@@ -85,19 +83,16 @@ class App
     // XXX See this.setup_cb() for more initialization. (OSC receiver, etc.)
   }
   
-  public void set_force_threshold(int value)
-  {
+  public void set_force_threshold(int value) {
     // TODO: we could have a different force threshold for each spraycan
     this._force_threshold = value;
   }
   
-  private synchronized void _push_command(Command command)
-  {
+  private synchronized void _push_command(Command command) {
     this._commands.add(command);
   }
   
-  private synchronized Command _pop_command()
-  {
+  private synchronized Command _pop_command() {
     Command ret = null;
     if (this._commands.size() > 0)
     {
@@ -107,34 +102,27 @@ class App
     return ret;
   }
   
-  private void _consume_commands()
-  {
+  private void _consume_commands() {
     // Happens in the draw_cb thread.
     
     final int MAX_COMMANDS = 1000;
-    for (int i = 0; i < MAX_COMMANDS; i ++)
-    {
+    for (int i = 0; i < MAX_COMMANDS; i ++) {
       Command command = this._pop_command();
-      if (command == null)
-      {
+      if (command == null) {
         break;
-      }
-      else
-      {
+      } else {
         command.apply(this);
       }
     }
   }
   
-  private void _add_one_brush(String image_file_name)
-  {
+  private void _add_one_brush(String image_file_name) {
     Brush image_brush = new ImageBrush();
     ((ImageBrush) image_brush).load_image(image_file_name);
     this._brushes.add(image_brush);
   }
   
-  private void _load_brushes()
-  {
+  private void _load_brushes() {
     //Brush point_shader_brush = new PointShaderBrush();
     //this._brushes.add(point_shader_brush);
     
@@ -215,41 +203,31 @@ class App
     this._brushes.add((Brush) new EraserBrush()); // 14
   }
   
-  public boolean has_can_index(int spray_can_index)
-  {
+  public boolean has_can_index(int spray_can_index) {
     return (0 <= spray_can_index && spray_can_index < this.NUM_SPRAY_CANS);
   }
   
-  public boolean choose_brush(int spray_can_index, int brush_index)
-  {
+  public boolean choose_brush(int spray_can_index, int brush_index) {
     // TODO: test this
-    if (has_can_index(spray_can_index))
-    {
-      if (brush_index >= this._brushes.size())
-      {
+    if (has_can_index(spray_can_index)) {
+      if (brush_index >= this._brushes.size()) {
         println("Warning: no such brush index: " + brush_index); 
         return false;
-      }
-      else
-      {
+      } else {
         this._spray_cans.get(spray_can_index).set_current_brush(this._brushes.get(brush_index));
         return true;
       }
-    }
-    else
-    {
+    } else {
       println("Warning: no such spray can index: " + spray_can_index); 
       return false;
     }
   }
 
-  public void set_verbose(boolean value)
-  {
+  public void set_verbose(boolean value) {
     this._verbose = value;
   }
 
-  public void set_osc_receive_port(int value)
-  {
+  public void set_osc_receive_port(int value) {
     this._osc_receive_port = value;
   }
 
@@ -257,8 +235,7 @@ class App
    * Sets the size of the canvas. 
    * Called from the main sketch file.
    */
-  public void set_sketch_size(int size_width, int size_height)
-  {
+  public void set_sketch_size(int size_width, int size_height) {
     this._width = size_width;
     this._height = size_height;
   }
@@ -267,8 +244,7 @@ class App
    * Sets up the app.
    * Called from the main sketch file.
    */
-  public void setup_cb()
-  {
+  public void setup_cb() {
     //this._test_buffer = createGraphics(this._width, this._height, P3D);
     // start oscP5, listening for incoming messages at a given port
     this._osc_receiver = new OscP5(this, this._osc_receive_port);
@@ -277,16 +253,15 @@ class App
 
   /**
    * Draws the whole sketch.
+   *
    * Called from the main sketch file.
    */
-  public void draw_cb(float mouse_x, float mouse_y)
-  {
+  public void draw_cb(float mouse_x, float mouse_y) {
     background(0, 0, 0, 0);
     // background(0);
     //image(this._background_image, 0, 0);
     
-    if (this._mouse_is_pressed)
-    {
+    if (this._mouse_is_pressed) {
       // FIXME: we must set the value of the force sensor to set the alpha_ratio
       this._push_command((Command)
           new AddNodeCommand(MOUSE_GRAFFITI_IDENTIFIER, mouse_x, mouse_y)); // , float size
@@ -297,85 +272,63 @@ class App
     this._consume_commands();
     
     // draw the spray cans in the order to the layer they are on:
-    for (int layer = 0; layer < MAX_LAYER; layer++)
-    {
-      for (int i = 0; i < this._spray_cans.size(); i++)
-      {
+    for (int layer = 0; layer < MAX_LAYER; layer++) {
+      for (int i = 0; i < this._spray_cans.size(); i++) {
         SprayCan spray_can = this._spray_cans.get(i);
-        if (spray_can.get_layer() == layer)
-        {
+        if (spray_can.get_layer() == layer) {
           spray_can.draw_spraycan();
         }
       }
     }
     // we do not care about the layer number for the rendering order of the cursors
-    for (int i = 0; i < this._spray_cans.size(); i++)
-    {
+    for (int i = 0; i < this._spray_cans.size(); i++) {
       this._spray_cans.get(i).draw_cursor();
     }
   }
 
-  private void log_debug(String message)
-  {
-    if (this._verbose)
-    {
+  private void log_debug(String message) {
+    if (this._verbose) {
       println(message);
     }
   }
 
-  private void log_info(String message)
-  {
+  private void log_info(String message) {
     println(message);
   }
 
-  public void mousePressed_cb(float mouse_x, float mouse_y)
-  {
+  public void mousePressed_cb(float mouse_x, float mouse_y) {
     this._mouse_is_pressed = true;
     
-    if (this._spray_cans.get(MOUSE_GRAFFITI_IDENTIFIER).get_enable_linked_strokes())
-    {
+    if (this._spray_cans.get(MOUSE_GRAFFITI_IDENTIFIER).get_enable_linked_strokes()) {
       // no need to add a new node, since it will be added in the blob cb.
       //this._push_command((Command)
       //    new AddNodeCommand(MOUSE_GRAFFITI_IDENTIFIER, x, y));
-    }
-    else
-    {
+    } else {
       this._push_command((Command)
           new NewStrokeCommand(MOUSE_GRAFFITI_IDENTIFIER));
     }
   }
 
-  public void mouseReleased_cb(float mouse_x, float mouse_y)
-  {
+  public void mouseReleased_cb(float mouse_x, float mouse_y) {
     // TODO: record on the undo stack
     // add EndStrokeCommand
     this._mouse_is_pressed = false;
   }
 
-  public void keyPressed_cb()
-  {
-    if (key == 'z' || key == 'Z')
-    {
+  public void keyPressed_cb() {
+    if (key == 'z' || key == 'Z') {
       this.handle_undo(MOUSE_GRAFFITI_IDENTIFIER);
-    }
-    else if (key == 'r' || key == 'R')
-    {
+    } else if (key == 'r' || key == 'R') {
       this.handle_redo(MOUSE_GRAFFITI_IDENTIFIER);
-    }
-    else if (key == CODED && keyCode == SHIFT)
-    {
+    } else if (key == CODED && keyCode == SHIFT) {
       this.handle_enable_linked_strokes(MOUSE_GRAFFITI_IDENTIFIER, true);
-    }
-    else if (key == 'x' || key == 'X')
-    {
+    } else if (key == 'x' || key == 'X') {
       this.handle_clear(MOUSE_GRAFFITI_IDENTIFIER);
     }
   }
   
-  public void keyReleased_cb()
-  {
-    if (key == CODED && keyCode == SHIFT)
-    {
+  public void keyReleased_cb() {
+    if (key == CODED && keyCode == SHIFT) {
       this.handle_enable_linked_strokes(MOUSE_GRAFFITI_IDENTIFIER, true);
     }
   }
@@ -383,8 +336,7 @@ class App
   /**
    * Convert a X coordinate from blob range to display range.
    */
-  private float map_x(int spray_can_index, float value)
-  {
+  private float map_x(int spray_can_index, float value) {
     SprayCan spray_can = this._spray_cans.get(spray_can_index);
     float scale_center_x = spray_can.get_scale_center_x();
     float scale_factor = spray_can.get_scale_factor();
@@ -397,8 +349,7 @@ class App
   /**
    * Convert a Y coordinate from blob range to display range.
    */
-  private float map_y(int spray_can_index, float value)
-  {
+  private float map_y(int spray_can_index, float value) {
     float height_3_4 = this._width * (3.0 / 4.0);
     SprayCan spray_can = this._spray_cans.get(spray_can_index);
     float scale_center_y = spray_can.get_scale_center_y();
@@ -412,15 +363,11 @@ class App
   /**
    * Handles /color OSC messages.
    */
-  private void handle_color(int spray_can_index, int r, int g, int b, int a)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_color(int spray_can_index, int r, int g, int b, int a) {
+    if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
       spray_can.set_color(color(r, g, b, a));
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -433,15 +380,11 @@ class App
    * @param x: range [0,1]
    * @param y: range [0,1]
    */
-  private void handle_scale_center(int spray_can_index, float x, float y)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_scale_center(int spray_can_index, float x, float y) {
+    if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
       spray_can.set_scale_center(x, y);
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -449,15 +392,11 @@ class App
   /**
    * @param factor: range [0,1] How big the scaled window will be. (1 is the default)
    */
-  private void handle_scale_factor(int spray_can_index, float factor)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_scale_factor(int spray_can_index, float factor) {
+    if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
       spray_can.set_scale_factor(factor);
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -466,15 +405,11 @@ class App
    * Handles /set/step_size OSC messages.
    * For distance between each brush. (in pixels)
    */
-  private void handle_set_step_size(int spray_can_index, float value)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_set_step_size(int spray_can_index, float value) {
+    if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
       spray_can.set_step_size(value);
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -482,15 +417,11 @@ class App
   /**
    * Handles /brush/weight OSC messages.
    */
-  private void handle_brush_weight(int spray_can_index, int weight)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_brush_weight(int spray_can_index, int weight) {
+    if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
       spray_can.set_brush_weight(weight);
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -498,23 +429,16 @@ class App
   /**
    * Handles /brush/choice OSC messages.
    */
-  private void handle_brush_choice(int spray_can_index, int brush_index)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_brush_choice(int spray_can_index, int brush_index) {
+    if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      if (brush_index >= this._brushes.size())
-      {
+      if (brush_index >= this._brushes.size()) {
         println("no such brush index " + brush_index);
-      }
-      else
-      {
+      } else {
         Brush brush = this._brushes.get(brush_index);
         spray_can.set_current_brush(brush);
       }
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -530,22 +454,17 @@ class App
   /**
    * Handles /blob OSC messages.
    */
-  private void handle_blob(int spray_can_index, int x, int y, int size)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_blob(int spray_can_index, int x, int y, int size) {
+    if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
       float mapped_x = this.map_x(spray_can_index, x);
       float mapped_y = this.map_y(spray_can_index, y);
       spray_can.set_cursor_x_y_size(mapped_x, mapped_y, size);
-      if (spray_can.get_is_spraying())
-      {
+      if (spray_can.get_is_spraying()) {
         this._push_command((Command)
             new AddNodeCommand(spray_can_index, mapped_x, mapped_y, size));
       }
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -554,22 +473,15 @@ class App
    * Handles /layer OSC messages.
    * @param layer_number index within the range [0,9]
    */
-  private void handle_layer(int spray_can_index, int layer_number)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_layer(int spray_can_index, int layer_number) {
+    if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      if (layer_number >= MAX_LAYER)
-      {
+      if (layer_number >= MAX_LAYER) {
         println("Layer number too big: " + MAX_LAYER);
-      }
-      else
-      {
+      } else {
         spray_can.set_layer(layer_number);
       }
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -578,11 +490,9 @@ class App
    * Given a force amount (from the FSR sensor)
    * it converts it to a boolean: is pressed or not.
    */
-  private boolean _force_to_is_pressed(float force)
-  {
+  private boolean _force_to_is_pressed(float force) {
     boolean ret = false;
-    if (force > this._force_threshold)
-    {
+    if (force > this._force_threshold) {
       ret = true;
     }
     return ret;
@@ -591,48 +501,34 @@ class App
   /**
    * Handles /force OSC messages.
    */
-  private void handle_force(int spray_can_index, float force)
-  {
+  private void handle_force(int spray_can_index, float force) {
     // Invert the number (only once here)
     //force = FORCE_MAX - force;
-     
-    
-    if (this.has_can_index(spray_can_index))
-    {
+
+    if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      if (this.debug_force)
-      
-      //println("FORCE: " + force);
-     //println("INDEX: " + spray_can_index);
-      
-      {
+      if (this.debug_force) {
+        // println("INDEX: " + spray_can_index);
         println("FORCE: " + force);
       }
       boolean is_pressed = this._force_to_is_pressed(force);
       boolean was_pressed = spray_can.get_is_spraying();
       spray_can.set_is_spraying(is_pressed);
       spray_can.set_alpha_ratio(this._map_force_to_alpha_ratio(force));
-      if (! was_pressed && is_pressed)
-      {
-        if (this.debug_force)
-        {
+      if (! was_pressed && is_pressed) {
+        if (this.debug_force) {
           println("FORCE: NEW STROKE");
         }
         
         // create the new stroke - or just add a new node in the previous stroke if linked strokes are enabled
-        if (spray_can.get_enable_linked_strokes())
-        {
+        if (spray_can.get_enable_linked_strokes()) {
           // nothing to do
-        }
-        else
-        {
+        } else {
           this._push_command((Command)
               new NewStrokeCommand(spray_can_index)); // TODO: should we already create the first node, for faster response?
         }
       }
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -640,28 +536,20 @@ class App
   /**
    * Handles redo OSC messages.
    */
-  private void handle_redo(int spray_can_index)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_redo(int spray_can_index) {
+    if (this.has_can_index(spray_can_index)) {
       this._push_command((Command)
           new RedoCommand(spray_can_index));
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
   
-  private void handle_enable_linked_strokes(int spray_can_index, boolean enable)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_enable_linked_strokes(int spray_can_index, boolean enable) {
+    if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
       spray_can.set_enable_linked_strokes(enable);
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -669,15 +557,11 @@ class App
   /**
    * Handles undo OSC messages.
    */
-  private void handle_undo(int spray_can_index)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_undo(int spray_can_index) {
+    if (this.has_can_index(spray_can_index)) {
       this._push_command((Command)
           new UndoCommand(spray_can_index));
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -685,15 +569,11 @@ class App
   /**
    * Handles clear OSC messages.
    */
-  private void handle_clear(int spray_can_index)
-  {
-    if (this.has_can_index(spray_can_index))
-    {
+  private void handle_clear(int spray_can_index) {
+    if (this.has_can_index(spray_can_index)) {
       this._push_command((Command)
           new ClearCommand(spray_can_index));
-    }
-    else
-    {
+    } else {
       println("No such can index " + spray_can_index);
     }
   }
@@ -701,8 +581,7 @@ class App
   /**
    * Called by a command.
    */
-  public void apply_add_node(int spray_can_index, float x, float y) // , float size)
-  {
+  public void apply_add_node(int spray_can_index, float x, float y) {
     SprayCan spray_can = this._spray_cans.get(spray_can_index);
     spray_can.add_node(x, y);
   }
@@ -710,8 +589,7 @@ class App
   /**
    * Called by a command.
    */
-  public void apply_new_stroke(int spray_can_index)
-  {
+  public void apply_new_stroke(int spray_can_index) {
     SprayCan spray_can = this._spray_cans.get(spray_can_index);
     spray_can.start_new_stroke();
   }
@@ -719,8 +597,7 @@ class App
   /**
    * Called by a command.
    */
-  public void apply_new_stroke(int spray_can_index, float x, float y)
-  {
+  public void apply_new_stroke(int spray_can_index, float x, float y) {
     SprayCan spray_can = this._spray_cans.get(spray_can_index);
     spray_can.start_new_stroke(x, y);
   }
@@ -728,8 +605,7 @@ class App
   /**
    * Called by a command.
    */
-  public void apply_new_stroke(int spray_can_index, float x, float y, float size)
-  {
+  public void apply_new_stroke(int spray_can_index, float x, float y, float size) {
     SprayCan spray_can = this._spray_cans.get(spray_can_index);
     spray_can.start_new_stroke(x, y, size);
   }
@@ -737,8 +613,7 @@ class App
   /**
    * Called by a command.
    */
-  public void apply_undo(int spray_can_index)
-  {
+  public void apply_undo(int spray_can_index) {
     SprayCan spray_can = this._spray_cans.get(spray_can_index);
     spray_can.undo();
   }
@@ -746,8 +621,7 @@ class App
   /**
    * Called by a command.
    */
-  public void apply_redo(int spray_can_index)
-  {
+  public void apply_redo(int spray_can_index) {
     SprayCan spray_can = this._spray_cans.get(spray_can_index);
     spray_can.redo();
   }
@@ -755,8 +629,7 @@ class App
   /**
    * Called by a command.
    */
-  public void apply_clear(int spray_can_index)
-  {
+  public void apply_clear(int spray_can_index) {
     SprayCan spray_can = this._spray_cans.get(spray_can_index);
     spray_can.clear_all_strokes();
   }
@@ -766,8 +639,7 @@ class App
    *
    * The name of this method is set up by the oscP5 library.
    */
-  public void oscEvent(OscMessage message)
-  {
+  public void oscEvent(OscMessage message) {
     int identifier = 0;
     //print("Received " + message.addrPattern() + " " + message.typetag() + "\n");
     
@@ -777,126 +649,90 @@ class App
       // TODO: parse string identifier as a first OSC argument
       float force = 0;
       
-      if (message.checkTypetag("ffffffffffffffffffffff"))
-      {
+      if (message.checkTypetag("ffffffffffffffffffffff")) {
         identifier = 1;
         force = message.get(12).floatValue();
         //println(force);
-      }
-      
-      else
-      {
+      } else {
         println("Wrong OSC typetags for /1/raw: " + message.typetag());
         // we use to support only the value - no identifier, but
         // not anymore
       }
       this.handle_force(identifier, force);
     }
-    
-    
-    
     else if (message.checkAddrPattern("/2/raw"))
     {
       // TODO: parse string identifier as a first OSC argument
       float force = 0;
-      if (message.checkTypetag("ffffffffffffffffffffff"))
-      {
+      if (message.checkTypetag("ffffffffffffffffffffff")) {
         identifier = 2;
         force = message.get(12).floatValue();
         //println(force);
-      }
-      
-      else
-      {
+      } else {
         println("Wrong OSC typetags for /2/raw: " + message.typetag());
         // we use to support only the value - no identifier, but
         // not anymore
       }
       this.handle_force(identifier, force);
     }
-    
-    
-    
     else if (message.checkAddrPattern("/3/raw"))
     {
       // TODO: parse string identifier as a first OSC argument
       float force = 0;
-      if (message.checkTypetag("ffffffffffffffffffffff"))
-      {
+      if (message.checkTypetag("ffffffffffffffffffffff")) {
         identifier = 3;
         force = message.get(12).floatValue();
         //println(force);
-      }
-      
-      else
-      {
+      } else {
         println("Wrong OSC typetags for /3/raw: " + message.typetag());
         // we use to support only the value - no identifier, but
         // not anymore
       }
       this.handle_force(identifier, force);
     }
-    
-    
-    
     else if (message.checkAddrPattern("/4/raw"))
     {
       // TODO: parse string identifier as a first OSC argument
       float force = 0;
-      if (message.checkTypetag("ffffffffffffffffffffff"))
-      {
+      if (message.checkTypetag("ffffffffffffffffffffff")) {
         identifier = 4;
         force = message.get(12).floatValue();
         //println(force);
-      }
-      
-      else
-      {
+      } else {
         println("Wrong OSC typetags for /4/raw: " + message.typetag());
         // we use to support only the value - no identifier, but
         // not anymore
       }
       this.handle_force(identifier, force);
     }
-    
-    
-    
     else if (message.checkAddrPattern("/5/raw"))
     {
       // TODO: parse string identifier as a first OSC argument
       float force = 0;
-      if (message.checkTypetag("ffffffffffffffffffffff"))
-      {
+      if (message.checkTypetag("ffffffffffffffffffffff")) {
         identifier = 5;
         force = message.get(12).floatValue();
         //println(force);
-      }
-      
-      else
-      {
+      } else {
         println("Wrong OSC typetags for /5/raw: "  + message.typetag());
         // we use to support only the value - no identifier, but
         // not anymore
       }
       this.handle_force(identifier, force);
     }
-    
-    
+
     // ---  /blob ---
     else if (message.checkAddrPattern("/blob"))
     {
       int x = 0;
       int y = 0;
       int size = 0;
-      if (message.checkTypetag("iiii"))
-      {
+      if (message.checkTypetag("iiii")) {
         identifier = message.get(0).intValue();
         x = message.get(1).intValue();
         y = message.get(2).intValue();
         size = message.get(3).intValue();
-      }
-      else
-      {
+      } else {
         println("Wrong OSC typetags for /blob: "  + message.typetag());
       }
       this.handle_blob(identifier, x, y, size);
@@ -909,31 +745,24 @@ class App
       int g = 255;
       int b = 255;
       int a = 255;
-      if (message.checkTypetag("iiii"))
-      {
+      if (message.checkTypetag("iiii")) {
         identifier = message.get(0).intValue();
         r = message.get(1).intValue();
         g = message.get(2).intValue();
         b = message.get(3).intValue();
-      }
-      else if (message.checkTypetag("iiiii"))
-      {
+      } else if (message.checkTypetag("iiiii")) {
         identifier = message.get(0).intValue();
         r = message.get(1).intValue();
         g = message.get(2).intValue();
         b = message.get(3).intValue();
         a = message.get(4).intValue();
-      }
-      else if (message.checkTypetag("iffff"))
-      {
+      } else if (message.checkTypetag("iffff")) {
         identifier = message.get(0).intValue();
         r = (int) message.get(1).floatValue();
         g = (int) message.get(2).floatValue();
         b = (int) message.get(3).floatValue();
         a = (int) message.get(4).floatValue();
-      }
-      else
-      {
+      } else {
         println("Wrong OSC typetags for /color: " + message.typetag());
       }
       this.handle_color(identifier, r, g, b, a);
@@ -943,18 +772,13 @@ class App
     else if (message.checkAddrPattern("/brush/weight"))
     {
       int weight = 100;
-      if (message.checkTypetag("ii"))
-      {
+      if (message.checkTypetag("ii")) {
         identifier = message.get(0).intValue();
         weight = message.get(1).intValue();
-      }
-      else if (message.checkTypetag("if"))
-      {
+      } else if (message.checkTypetag("if")) {
         identifier = message.get(0).intValue();
         weight = (int) message.get(1).floatValue();
-      }
-      else
-      {
+      } else {
         println("Wrong OSC typetags for /brush/weight: " + message.typetag());
       }
       this.handle_brush_weight(identifier, weight);
@@ -964,13 +788,10 @@ class App
     else if (message.checkAddrPattern("/brush/choice"))
     {
       int brush_choice = 0;
-      if (message.checkTypetag("ii"))
-      {
+      if (message.checkTypetag("ii")) {
         identifier = message.get(0).intValue();
         brush_choice = message.get(1).intValue();
-      }
-      else
-      {
+      } else {
         println("Wrong OSC typetags for /brush/choice: " + message.typetag());
       }
       this.handle_brush_choice(identifier, brush_choice);
@@ -979,8 +800,7 @@ class App
     // ---  /undo ---
     else if (message.checkAddrPattern("/undo"))
     {
-      if (message.checkTypetag("i"))
-      {
+      if (message.checkTypetag("i")) {
         identifier = message.get(0).intValue();
         this.handle_undo(identifier);
       }
@@ -989,8 +809,7 @@ class App
     // ---  /redo ---
     else if (message.checkAddrPattern("/redo"))
     {
-      if (message.checkTypetag("i"))
-      {
+      if (message.checkTypetag("i")) {
         identifier = message.get(0).intValue();
         this.handle_redo(identifier);
       }
@@ -999,8 +818,7 @@ class App
      // ---  /clear ---
     else if (message.checkAddrPattern("/clear"))
     {
-      if (message.checkTypetag("i"))
-      {
+      if (message.checkTypetag("i")) {
         identifier = message.get(0).intValue();
         this.handle_clear(identifier);
       }
@@ -1008,8 +826,7 @@ class App
     
     else if (message.checkAddrPattern("/set/force/threshold"))
     {
-      if (message.checkTypetag("i"))
-      {
+      if (message.checkTypetag("i")) {
         int value = message.get(0).intValue();
         this.set_force_threshold(value);
       }
@@ -1017,8 +834,7 @@ class App
 
     else if (message.checkAddrPattern("/set/step_size"))
     {
-      if (message.checkTypetag("if"))
-      {
+      if (message.checkTypetag("if")) {
         identifier = message.get(0).intValue();
         float value = message.get(1).floatValue();
         this.handle_set_step_size(identifier, value);
@@ -1027,8 +843,7 @@ class App
     
     else if (message.checkAddrPattern("/scale/center"))
     {
-      if (message.checkTypetag("iff"))
-      {
+      if (message.checkTypetag("iff")) {
         identifier = message.get(0).intValue();
         float x = message.get(1).floatValue();
         float y = message.get(2).floatValue();
@@ -1038,8 +853,7 @@ class App
     
     else if (message.checkAddrPattern("/scale/factor"))
     {
-      if (message.checkTypetag("if"))
-      {
+      if (message.checkTypetag("if")) {
         identifier = message.get(0).intValue();
         float value = message.get(1).floatValue();
         this.handle_scale_factor(identifier, value);
@@ -1048,8 +862,7 @@ class App
     
     else if (message.checkAddrPattern("/layer"))
     {
-      if (message.checkTypetag("ii"))
-      {
+      if (message.checkTypetag("ii")) {
         identifier = message.get(0).intValue();
         int value = message.get(1).intValue();
         this.handle_layer(identifier, value);
@@ -1058,20 +871,17 @@ class App
     
     else if (message.checkAddrPattern("/link_strokes"))
     {
-      if (message.checkTypetag("ii"))
-      {
+      if (message.checkTypetag("ii")) {
         identifier = message.get(0).intValue();
         boolean value = message.get(1).intValue() == 1;
         this.handle_enable_linked_strokes(identifier, value);
       }
     }
-    
-    
+
     // fallback
     else
     {
       println("Unknown OSC message.");
     }
-    
   }
 }

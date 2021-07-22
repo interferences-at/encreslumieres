@@ -1,15 +1,12 @@
 /**
- * Round eraser.
+ * Round eraser brush.
  */
-class EraserBrush extends Brush
-{
-  public EraserBrush()
-  {
+class EraserBrush extends Brush {
+  public EraserBrush() {
     super();
   }
   
-  public final void draw_brush(PGraphics buffer, float x, float y, float size, color colour)
-  {
+  public final void draw_brush(PGraphics buffer, float x, float y, float size, color colour) {
     color c = color(0, 0, 0, 0); // transparent black
     float radius = size / 2.0;
     //canvas.beginDraw();
