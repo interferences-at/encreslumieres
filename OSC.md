@@ -7,8 +7,7 @@ Notes:
 
 ## blob
 
-Signatures:
-* `/blob ,ifff`
+Signature:
 * `/blob ,iiii`
 
 Arguments:
@@ -23,19 +22,24 @@ position moves around the brush.
 See the blobdetective software.
 
 
-## force
+## /N/raw - force
 
-Signatures:
-* `/force ,if`
-* `/force ,ii`
+Signature:
+* `/1/raw ,ffffffffffffffffffffff`
+* `/2/raw ,ffffffffffffffffffffff`
+* `/3/raw ,ffffffffffffffffffffff`
+* `/4/raw ,ffffffffffffffffffffff`
+* `/5/raw ,ffffffffffffffffffffff`
+
+The path includes the spray identifier
 
 Arguments:
-* Argument 1: spray identifier.
-* Argument 2: force [0-1023] - If it's < 400, it means it's pressed.
+* Argument 12: force [0-1023] - If it's > 300, it means it's pressed.
 
 Description:
-The force is used as an on/off controller for painting.
+The force is used as an on/off/amount controller for painting.
 
+Its odd OSC signature is due to the fact that it's the format of the messages we receive from the BITalino R-IoT, a microcontroller that sends OSC via wifi, and that also contains onboard sensors, such as an accelerometer and a gyroscope.
 
 ## color
 
