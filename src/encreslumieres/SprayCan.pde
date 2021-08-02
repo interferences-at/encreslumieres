@@ -5,15 +5,12 @@ class SprayCan {
   // constants
   private final float DEFAULT_STEP_SIZE = 1.0; // how many pixels between each brush drawn - interpolated. See PointShaderBrush
   private final float DEFAULT_BRUSH_WEIGHT = 64; // size of the brush in pixels
-  private final int NUMBER_OF_UNDO_LEVELS = 5;
-  private final boolean ENABLE_UNDO = false; // Set to true to enable the undo system!
 
   // attributes
   private ArrayList<Stroke> _strokes; // Lists of nodes - to be drawn only once
   private color _color; // Current color
   private float _brush_weight = DEFAULT_BRUSH_WEIGHT; // Set for each can using OSC messages.
   private Brush _current_brush; // Instance of a Brush to draw on our buffer
-  private PGraphics _buffer = null; // Our pixel buffer.
   private int _image_width; // sketch size
   private int _image_height; // sketch size
   private float _default_step_size; // how many pixels between each brush drawn - interpolated. See PointShaderBrush
@@ -21,12 +18,11 @@ class SprayCan {
   private float _cursor_y = 0.0; // blob Y
   private float _cursor_blob_size = 0.0; // blob size
   private boolean _is_spraying = false; // set when we receive /force
-  private Undo _undo;
   private float _alpha_ratio = 1.0; // range: [0,1]
   private float _scale_center_x = 0.5;
   private float _scale_center_y = 0.5;
   private float _scale_factor = 1.0;
-  private int _layer = 0;
+  private Layer _layer;
   private boolean _enable_linked_strokes = false;
 
   /**
@@ -34,15 +30,15 @@ class SprayCan {
    * There can be up to a few cans drawing at the same time.
    * Each can sends OSC messages via the Wifi network. (/blob position, /force amount, /color, etc.)
    */
-  public SprayCan(int image_width, int image_height) {
+  public SprayCan(int image_width, int image_height, Layer layer) {
     this._strokes = new ArrayList<Stroke>();
+    this._layer = layer;
     this._color = color(255, 255, 255, 255);
     //this._brush_size = this.DEFAULT_BRUSH_SIZE; // FIXME
     this._default_step_size = this.DEFAULT_STEP_SIZE;
     this._image_width = image_width;
     this._image_height = image_height;
-    this._undo = new Undo(this.NUMBER_OF_UNDO_LEVELS, this._image_width, this._image_height);
-    this.clear_all_strokes(); // Creates the this._buffer
+    this.clear_all_strokes();
   }
   
   /**
@@ -76,11 +72,11 @@ class SprayCan {
     this._default_step_size = value;
   }
   
-  public void set_layer(int value) {
-    this._layer = value;
+  public void set_layer(Layer layer) {
+    this._layer = layer;
   }
   
-  public int get_layer() {
+  public Layer get_layer() {
     return this._layer;
   }
   
@@ -132,12 +128,13 @@ class SprayCan {
    * Right now, each node is drawn on each frame. This is O(n) where n = number of nodes.
    */
   public void draw_spraycan() {
-    this._buffer.beginDraw();
+    PGraphics buffer = this._layer.get_buffer();
+    buffer.beginDraw();
     for (Stroke stroke : this._strokes) {
-      stroke.draw_stroke(this._buffer);
+      stroke.draw_stroke(buffer);
     }
-    image(this._buffer, 0, 0);
-    this._buffer.endDraw();
+    image(buffer, 0, 0);
+    buffer.endDraw();
   }
   
   /**
@@ -205,20 +202,17 @@ class SprayCan {
    * Deletes all the strokes.
    */
   public void clear_all_strokes() {
-    //for (Stroke stroke : this._strokes)
-    //{
-      // Uneeded
-      // And seems to cause a NullPointerException - sometimes when we have been drawing a bit
-      // stroke.clear_stroke();
-    //}
     this._strokes.clear();
-    this._buffer = createGraphics(this._image_width, this._image_height);
-    // we used to use the P3D renderer, as a 3rd argument
-    this._buffer.colorMode(RGB, 255);
-    this._buffer.beginDraw();
-    this._buffer.background(0, 0, 0, 0);
-    this._buffer.endDraw();
-    this._save_snapshot_for_undo_stack();
+    boolean also_clear_layer = false;
+    if (also_clear_layer) {
+      PGraphics buffer = this._layer.get_buffer();
+      buffer = createGraphics(this._image_width, this._image_height);
+      // we used to use the P3D renderer, as a 3rd argument
+      buffer.colorMode(RGB, 255);
+      buffer.beginDraw();
+      buffer.background(0, 0, 0, 0);
+      buffer.endDraw();
+    }
   }
   
   private float _get_node_weight() {
@@ -235,19 +229,12 @@ class SprayCan {
    * Starts a stroke with a given first node position and size.
    */
   public void start_new_stroke(float x, float y, float cursor_blob_size) {
-    this._save_snapshot_for_undo_stack();
     color colour = this._generate_color_with_alpha_from_force();
     Node starting_node = new Node(x, y, this._get_node_weight(), colour);
     this._cursor_blob_size = cursor_blob_size;
     Stroke stroke = new Stroke(starting_node, this._default_step_size);
     stroke.set_brush(this._current_brush);
     this._strokes.add(stroke);
-  }
-  
-  private void _save_snapshot_for_undo_stack() {
-    if (ENABLE_UNDO) {
-      this._undo.take_snapshot(this._buffer);
-    }
   }
   
   /**
@@ -263,8 +250,6 @@ class SprayCan {
    * Creates no first node.
    */
   public void start_new_stroke() {
-    this._save_snapshot_for_undo_stack();
-    
     Stroke stroke = new Stroke();
     stroke.set_step_size(this._default_step_size);
     stroke.set_brush(this._current_brush);
@@ -282,9 +267,8 @@ class SprayCan {
     } else {
       this._cursor_blob_size = cursor_blob_size;
       color colour = this._generate_color_with_alpha_from_force();
-      Node newKnot = new Node(x, y, this._get_node_weight(), colour);
-      
-      active_stroke.add_knot(newKnot);
+      Node node = new Node(x, y, this._get_node_weight(), colour);
+      active_stroke.add_knot(node);
       return;
     }
   }
@@ -298,8 +282,6 @@ class SprayCan {
 
   /**
    * Return the stroke beeing drawn at the moment.
-   *
-   * FIXME: does this take into account the undo stack?
    */
   private Stroke _get_active_stroke() {
     if (this._strokes.size() == 0) {
@@ -323,40 +305,5 @@ class SprayCan {
    */
   public color get_color() {
     return this._color;
-  }
-  
-  public void undo() {
-    // FIXME: we save the pixel buffer, and can undo/redo it,
-    // but we don't delete the strokes and their nodes.
-    // The nodes are drawn only once, anyways
-    // and we save that to our pixel buffer
-    // so we don't care for now about there arrays
-    // but some day, when we want to save/playback the strokes
-    // we will want to cleanup these strokes when we done with one
-    // (since it was cancelled, for example)
-
-    if (ENABLE_UNDO) {
-      this._buffer.beginDraw();
-      this._buffer.pushStyle();
-      this._buffer.tint(color(255, 255, 255, 255));
-      this._undo.undo(this._buffer);
-      this._buffer.popStyle();
-      this._buffer.endDraw();
-    } else {
-      println("The undo system is disabled.");
-    }
-  }
-  
-  public void redo() {
-    if (ENABLE_UNDO) {
-      this._buffer.beginDraw();
-      this._buffer.pushStyle();
-      this._buffer.tint(color(255, 255, 255, 255));
-      this._undo.redo(this._buffer);
-      this._buffer.popStyle();
-      this._buffer.endDraw();
-    } else {
-      println("The undo system is disabled.");
-    }
   }
 }
