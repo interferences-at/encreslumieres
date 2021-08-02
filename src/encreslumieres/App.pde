@@ -43,9 +43,9 @@ class App {
 
   // private attributes
   private boolean _verbose = false;
-  private int _osc_receive_port = 8887;
-  private int _width = 640; // window width
-  private int _height = 480; // window height
+  private int _osc_receive_port = 8888;
+  private int _width = 1920; // window width
+  private int _height = 1080; // window height
   // private PGraphics _test_buffer = null;
   // PImage _background_image;
   OscP5 _osc_receiver;
@@ -65,7 +65,9 @@ class App {
    * 
    * See this.setup_cb() for more initialization. (OSC receiver, etc.)
    */
-  public App() {
+  public App(int canvasWidth, int canvasHeight) {
+    this._width = canvasWidth;
+    this._height = canvasHeight;
     this._brushes = new ArrayList<Brush>();
     this._commands = new ArrayList<Command>();
     this._load_brushes();
@@ -74,7 +76,7 @@ class App {
     this._spray_cans = new ArrayList<SprayCan>();
     for (int i = 0; i < this.NUM_SPRAY_CANS; i++)
     {
-      SprayCan item = new SprayCan(width, height); // FIXME using global vars here.
+      SprayCan item = new SprayCan(this._width, this._height);
       item.set_color(color(255, 255, 255, 255)); // default color is orange
       item.set_current_brush(this._brushes.get(this.DEFAULT_BRUSH));
       this._spray_cans.add(item);
@@ -104,8 +106,7 @@ class App {
   
   private void _consume_commands() {
     // Happens in the draw_cb thread.
-    
-    final int MAX_COMMANDS = 1000;
+    final int MAX_COMMANDS = this._commands.size();
     for (int i = 0; i < MAX_COMMANDS; i ++) {
       Command command = this._pop_command();
       if (command == null) {
@@ -122,6 +123,12 @@ class App {
     this._brushes.add(image_brush);
   }
   
+  /**
+   * Loads all the brushes.
+   *
+   * Modify this method when we add some new PNG images to draw with.
+   * (or any other kind of brush)
+   */
   private void _load_brushes() {
     //Brush point_shader_brush = new PointShaderBrush();
     //this._brushes.add(point_shader_brush);
@@ -203,12 +210,17 @@ class App {
     this._brushes.add((Brush) new EraserBrush()); // 14
   }
   
+  /**
+   * Checks if a given spray can index exists.
+   */
   public boolean has_can_index(int spray_can_index) {
     return (0 <= spray_can_index && spray_can_index < this.NUM_SPRAY_CANS);
   }
   
+  /**
+   * Chooses a brush for a given spray can.
+   */
   public boolean choose_brush(int spray_can_index, int brush_index) {
-    // TODO: test this
     if (has_can_index(spray_can_index)) {
       if (brush_index >= this._brushes.size()) {
         println("Warning: no such brush index: " + brush_index); 
@@ -227,7 +239,12 @@ class App {
     this._verbose = value;
   }
 
+  /**
+   * Sets the OSC receive port number.
+   * Call this before calling setup_cb().
+   */
   public void set_osc_receive_port(int value) {
+    // TODO: reset the this._osc_receiver when this is called.
     this._osc_receive_port = value;
   }
 
@@ -401,7 +418,7 @@ class App {
     }
   }
 
- /**
+  /**
    * Handles /set/step_size OSC messages.
    * For distance between each brush. (in pixels)
    */
@@ -777,7 +794,7 @@ class App {
         weight = message.get(1).intValue();
       } else if (message.checkTypetag("if")) {
         identifier = message.get(0).intValue();
-        weight = (int) message.get(1).floatValue();
+        weight = message.get(1).intValue();
       } else {
         println("Wrong OSC typetags for /brush/weight: " + message.typetag());
       }

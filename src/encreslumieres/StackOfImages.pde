@@ -8,7 +8,7 @@ class StackOfImages {
   
   public StackOfImages(int amountOfImages, int images_width, int images_height) {
     this._amount = amountOfImages;
- 
+    
     // Initialize all images as copies of the current display
     this._img = new PImage[this._amount];
     for (int i = 0; i < this._amount; i++) {
