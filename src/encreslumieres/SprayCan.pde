@@ -203,16 +203,6 @@ class SprayCan {
    */
   public void clear_all_strokes() {
     this._strokes.clear();
-    boolean also_clear_layer = false;
-    if (also_clear_layer) {
-      PGraphics buffer = this._layer.get_buffer();
-      buffer = createGraphics(this._image_width, this._image_height);
-      // we used to use the P3D renderer, as a 3rd argument
-      buffer.colorMode(RGB, 255);
-      buffer.beginDraw();
-      buffer.background(0, 0, 0, 0);
-      buffer.endDraw();
-    }
   }
   
   private float _get_node_weight() {
@@ -229,6 +219,7 @@ class SprayCan {
    * Starts a stroke with a given first node position and size.
    */
   public void start_new_stroke(float x, float y, float cursor_blob_size) {
+    this.clear_all_strokes(); // FIXME: We should probably not keep track of all strokes anymore.
     color colour = this._generate_color_with_alpha_from_force();
     Node starting_node = new Node(x, y, this._get_node_weight(), colour);
     this._cursor_blob_size = cursor_blob_size;
@@ -250,6 +241,7 @@ class SprayCan {
    * Creates no first node.
    */
   public void start_new_stroke() {
+    this.clear_all_strokes(); // FIXME: We should probably not keep track of all strokes anymore.
     Stroke stroke = new Stroke();
     stroke.set_step_size(this._default_step_size);
     stroke.set_brush(this._current_brush);
