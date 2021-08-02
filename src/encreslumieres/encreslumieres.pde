@@ -26,11 +26,11 @@ void settings() {
 
 void setup() {
   frameRate(60);
-  app = new App();
-  app.set_osc_receive_port(OSC_RECEIVE_PORT);
+  app = new App(width, height);
+  app.set_osc_receive_port(OSC_RECEIVE_PORT); // Must be called before app.setup_cb()
   app.set_verbose(VERBOSE);
   app.set_sketch_size(width, height);
-  app.setup_cb();
+  app.setup_cb(); // Make sure to call app.set_osc_receive_port(...) first.
   
   // XXX comment out next line if not using Syphon (macOS-only)
   // syphon_server = new SyphonServer(this, SYPHON_SERVER_NAME);

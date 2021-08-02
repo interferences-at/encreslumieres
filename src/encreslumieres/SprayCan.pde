@@ -134,14 +134,14 @@ class SprayCan {
   public void draw_spraycan() {
     this._buffer.beginDraw();
     for (Stroke stroke : this._strokes) {
-      stroke.draw_stroke(this._buffer); // , shader);
+      stroke.draw_stroke(this._buffer);
     }
     image(this._buffer, 0, 0);
     this._buffer.endDraw();
   }
   
   /**
-   * Draws the cursor on the canvas.
+   * Draws the cursor on the default canvas.
    */
   public void draw_cursor() {
     // we could use an image instead, but scaling it might be more complicated

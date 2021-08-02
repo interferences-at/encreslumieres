@@ -75,7 +75,7 @@ class Stroke {
     PVector prevPos = this._previous_node.get_position();
     PVector newPos  = this._current_node.get_position();
     PVector velocity = PVector.sub(newPos, prevPos);
- 
+
     // How many points can we fit between the two last knots?
     float mag = velocity.mag();
     

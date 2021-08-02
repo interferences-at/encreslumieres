@@ -1,5 +1,15 @@
 /**
+ * @file The class hierarchy of Commands.
+ *
+ * When we receive an OSC message, we create some commands.
+ * Those commands are then applied before drawing each frame.
+ */
+
+
+/**
  * A command is an action to do by the program.
+ *
+ * Parent class for all commands.
  */
 abstract class Command {
   private int _spray_can_index;
