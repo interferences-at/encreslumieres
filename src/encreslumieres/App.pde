@@ -28,7 +28,8 @@ class App {
   private final int NUM_SPRAY_CANS = 6; // maximum number of spraycans - not too many is more optimized
   private final int MOUSE_GRAFFITI_IDENTIFIER = 0; // the index of the mouse spraycan
   //private final String BACKGROUND_IMAGE_NAME = "background.png"; // you can change the background image by changing this file
-  private int DEFAULT_BRUSH = 0;
+  private int DEFAULT_BRUSH_INDEX = 0;
+  private int DEFAULT_LAYER_INDEX = 0;
   /*
    * Now, the /force we receive from the Arduino over wifi is 
    * within the range [0,1023] and we invert the number, so that
@@ -59,7 +60,7 @@ class App {
   
   float MINIMUM_ALPHA = 0.0; // Here is the min/max alpha ratio according to force FSR pressure sensor
   float MAXIMUM_ALPHA = 0.6;
-  int MAX_LAYER = 10;
+  int NUM_LAYERS = 10;
   
   /**
    * Constructor.
@@ -76,18 +77,20 @@ class App {
 
     // Layers:
     this._layers = new ArrayList<Layer>();
-    for (int i = 0; i < MAX_LAYER; i++) {
+    for (int i = 0; i < NUM_LAYERS; i++) {
       Layer item = new Layer(this._width, this._height);
       this._layers.add(item);
     }
+    Layer defaultLayer = this._layers.get(this.DEFAULT_LAYER_INDEX);
 
     // Spray cans:
     this._spray_cans = new ArrayList<SprayCan>();
     for (int i = 0; i < this.NUM_SPRAY_CANS; i++)
     {
-      SprayCan item = new SprayCan(this._width, this._height);
+      SprayCan item = new SprayCan(this._width, this._height, defaultLayer);
       item.set_color(color(255, 255, 255, 255)); // default color is orange
-      item.set_current_brush(this._brushes.get(this.DEFAULT_BRUSH));
+      item.set_current_brush(this._brushes.get(this.DEFAULT_BRUSH_INDEX));
+      item.set_layer(defaultLayer);
       this._spray_cans.add(item);
     }
     
@@ -214,7 +217,7 @@ class App {
     image_brush.load_image("13_Part01_00049_64x64.png");
     this._brushes.add((Brush) image_brush);
     
-    DEFAULT_BRUSH = 13;
+    DEFAULT_BRUSH_INDEX = 13; // FIXME: Does this have an effect?
     
     this._brushes.add((Brush) new EraserBrush()); // 14
   }
@@ -224,6 +227,13 @@ class App {
    */
   public boolean has_can_index(int spray_can_index) {
     return (0 <= spray_can_index && spray_can_index < this.NUM_SPRAY_CANS);
+  }
+
+  /**
+   * Checks if a given layer index exists.
+   */
+  public boolean has_layer(int layer_index) {
+    return (0 <= layer_index && layer_index < this.NUM_LAYERS);
   }
   
   /**
@@ -297,18 +307,20 @@ class App {
     // TODO: create a queue of OSC messages instead of command - for a simpler code?
     this._consume_commands();
     
-    // draw the spray cans in the order to the layer they are on:
-    for (int layer = 0; layer < MAX_LAYER; layer++) {
-      for (int i = 0; i < this._spray_cans.size(); i++) {
-        SprayCan spray_can = this._spray_cans.get(i);
-        if (spray_can.get_layer() == layer) {
-          spray_can.draw_spraycan();
-        }
-      }
+    // Render the spray cans, each to its own layer:
+    for (int spraycan_index = 0; spraycan_index < this._spray_cans.size(); spraycan_index++) {
+      SprayCan spraycan = this._spray_cans.get(spraycan_index);
+      spraycan.draw_spraycan();
+    }
+    // Draw each layer to the main window, starting from layer 0:
+    for (int layer_index = 0; layer_index < NUM_LAYERS; layer_index++) {
+      Layer layer = this._layers.get(layer_index);
+      layer.draw_layer();
     }
     // we do not care about the layer number for the rendering order of the cursors
-    for (int i = 0; i < this._spray_cans.size(); i++) {
-      this._spray_cans.get(i).draw_cursor();
+    for (int spraycan_index = 0; spraycan_index < this._spray_cans.size(); spraycan_index++) {
+      SprayCan spraycan = this._spray_cans.get(spraycan_index);
+      spraycan.draw_cursor();
     }
   }
 
@@ -336,17 +348,12 @@ class App {
   }
 
   public void mouseReleased_cb(float mouse_x, float mouse_y) {
-    // TODO: record on the undo stack
     // add EndStrokeCommand
     this._mouse_is_pressed = false;
   }
 
   public void keyPressed_cb() {
-    if (key == 'z' || key == 'Z') {
-      this.handle_undo(MOUSE_GRAFFITI_IDENTIFIER);
-    } else if (key == 'r' || key == 'R') {
-      this.handle_redo(MOUSE_GRAFFITI_IDENTIFIER);
-    } else if (key == CODED && keyCode == SHIFT) {
+    if (key == CODED && keyCode == SHIFT) {
       this.handle_enable_linked_strokes(MOUSE_GRAFFITI_IDENTIFIER, true);
     } else if (key == 'x' || key == 'X') {
       this.handle_clear(MOUSE_GRAFFITI_IDENTIFIER);
@@ -497,15 +504,16 @@ class App {
   
   /**
    * Handles /layer OSC messages.
-   * @param layer_number index within the range [0,MAX_LAYER]
+   * @param layer_number index within the range [0,NUM_LAYERS-1]
    */
   private void handle_layer(int spray_can_index, int layer_number) {
     if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      if (layer_number >= MAX_LAYER) {
-        println("Layer number too big: " + MAX_LAYER);
+      if (layer_number >= NUM_LAYERS) {
+        println("Layer number too big: " + NUM_LAYERS);
       } else {
-        spray_can.set_layer(layer_number);
+        Layer layer = this._layers.get(layer_number);
+        spray_can.set_layer(layer);
       }
     } else {
       println("No such can index " + spray_can_index);
@@ -558,18 +566,6 @@ class App {
       println("No such can index " + spray_can_index);
     }
   }
-
-  /**
-   * Handles redo OSC messages.
-   */
-  private void handle_redo(int spray_can_index) {
-    if (this.has_can_index(spray_can_index)) {
-      this._push_command((Command)
-          new RedoCommand(spray_can_index));
-    } else {
-      println("No such can index " + spray_can_index);
-    }
-  }
   
   private void handle_enable_linked_strokes(int spray_can_index, boolean enable) {
     if (this.has_can_index(spray_can_index)) {
@@ -581,26 +577,15 @@ class App {
   }
 
   /**
-   * Handles undo OSC messages.
-   */
-  private void handle_undo(int spray_can_index) {
-    if (this.has_can_index(spray_can_index)) {
-      this._push_command((Command)
-          new UndoCommand(spray_can_index));
-    } else {
-      println("No such can index " + spray_can_index);
-    }
-  }
-  
-  /**
    * Handles clear OSC messages.
    */
-  private void handle_clear(int spray_can_index) {
-    if (this.has_can_index(spray_can_index)) {
+  private void handle_clear(int layer_index) {
+    int useless_spraycan_arg = 0;
+    if (this.has_layer(layer_index)) {
       this._push_command((Command)
-          new ClearCommand(spray_can_index));
+          new ClearCommand(useless_spraycan_arg, layer_index));
     } else {
-      println("No such can index " + spray_can_index);
+      println("No such layer index " + layer_index);
     }
   }
   
@@ -608,56 +593,60 @@ class App {
    * Called by a command.
    */
   public void apply_add_node(int spray_can_index, float x, float y) {
-    SprayCan spray_can = this._spray_cans.get(spray_can_index);
-    spray_can.add_node(x, y);
+    if (this.has_can_index(spray_can_index)) {
+      SprayCan spray_can = this._spray_cans.get(spray_can_index);
+      spray_can.add_node(x, y);
+    } else {
+      println("Warning: No such spray can: " + spray_can_index);
+    }
   }
   
   /**
    * Called by a command.
    */
   public void apply_new_stroke(int spray_can_index) {
-    SprayCan spray_can = this._spray_cans.get(spray_can_index);
-    spray_can.start_new_stroke();
+    if (this.has_can_index(spray_can_index)) {
+      SprayCan spray_can = this._spray_cans.get(spray_can_index);
+      spray_can.start_new_stroke();
+    } else {
+      println("Warning: No such spray can: " + spray_can_index);
+    }
   }
   
   /**
    * Called by a command.
    */
   public void apply_new_stroke(int spray_can_index, float x, float y) {
-    SprayCan spray_can = this._spray_cans.get(spray_can_index);
-    spray_can.start_new_stroke(x, y);
+    if (this.has_can_index(spray_can_index)) {
+      SprayCan spray_can = this._spray_cans.get(spray_can_index);
+      spray_can.start_new_stroke(x, y);
+    } else {
+      println("Warning: No such spray can: " + spray_can_index);
+    }
   }
   
   /**
    * Called by a command.
    */
   public void apply_new_stroke(int spray_can_index, float x, float y, float size) {
-    SprayCan spray_can = this._spray_cans.get(spray_can_index);
-    spray_can.start_new_stroke(x, y, size);
+    if (this.has_can_index(spray_can_index)) {
+      SprayCan spray_can = this._spray_cans.get(spray_can_index);
+      spray_can.start_new_stroke(x, y, size);
+    } else {
+      println("Warning: No such spray can: " + spray_can_index);
+    }
   }
   
   /**
    * Called by a command.
    */
-  public void apply_undo(int spray_can_index) {
-    SprayCan spray_can = this._spray_cans.get(spray_can_index);
-    spray_can.undo();
-  }
-  
-  /**
-   * Called by a command.
-   */
-  public void apply_redo(int spray_can_index) {
-    SprayCan spray_can = this._spray_cans.get(spray_can_index);
-    spray_can.redo();
-  }
-  
-  /**
-   * Called by a command.
-   */
-  public void apply_clear(int spray_can_index) {
-    SprayCan spray_can = this._spray_cans.get(spray_can_index);
-    spray_can.clear_all_strokes();
+  public void apply_clear(int layer_index) {
+    if (this.has_layer(layer_index)) {
+      Layer layer = this._layers.get(layer_index);
+      layer.clear_layer();
+    } else {
+      println("Warning: No such layer" + layer_index);
+    }
   }
 
   /**
@@ -828,16 +817,6 @@ class App {
     {
       if (message.checkTypetag("i")) {
         identifier = message.get(0).intValue();
-        this.handle_undo(identifier);
-      }
-    }
-    
-    // ---  /redo ---
-    else if (message.checkAddrPattern("/redo"))
-    {
-      if (message.checkTypetag("i")) {
-        identifier = message.get(0).intValue();
-        this.handle_redo(identifier);
       }
     }
     
@@ -845,8 +824,8 @@ class App {
     else if (message.checkAddrPattern("/clear"))
     {
       if (message.checkTypetag("i")) {
-        identifier = message.get(0).intValue();
-        this.handle_clear(identifier);
+        int layer_index = message.get(0).intValue();
+        this.handle_clear(layer_index);
       }
     }
     

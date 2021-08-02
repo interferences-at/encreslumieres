@@ -92,42 +92,17 @@ public class NewStrokeCommand extends Command {
 
 
 /**
- * Undoes a command.
- */
-public class UndoCommand extends Command {
-    public UndoCommand(int spray_can_index) {
-      super(spray_can_index);
-    }
-    
-    public final void apply(App app) {
-      app.apply_undo(this.get_spray_can_index());
-    }
-}
-
-
-/**
- * Redoes a command.
- */
-public class RedoCommand extends Command {
-    public RedoCommand(int spray_can_index) {
-      super(spray_can_index);
-    }
-    
-    public final void apply(App app) {
-      app.apply_redo(this.get_spray_can_index());
-    }
-}
-
-/**
- * Clears the screen for a given can.
+ * Clears the screen for a given layer.
  */
 public class ClearCommand extends Command {
-    public ClearCommand(int spray_can_index) {
+    private int _layer_index;
+
+    public ClearCommand(int spray_can_index, int layer_index) {
       super(spray_can_index);
+      this._layer_index = layer_index;
     }
     
     public final void apply(App app) {
-      app.apply_clear(this.get_spray_can_index());
+      app.apply_clear(this._layer_index);
     }
 }
-

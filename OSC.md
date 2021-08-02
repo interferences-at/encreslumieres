@@ -201,3 +201,15 @@ Enables of disables the linked strokes for a spray can.
 The default for all spray cans is disabled.
 Every new stroke will be linked to the previous one with a straigth line, if
 enabled.
+
+## clear
+
+Signature:
+/clear ,i
+
+Arguments:
+* Argument 1: layer index
+
+Description:
+Clears a layer.
+

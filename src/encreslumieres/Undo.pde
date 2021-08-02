@@ -1,5 +1,11 @@
 /**
  * Manages the undo stack.
+ *
+ * The way it works is: we take a snapshot of a PGraphics
+ * each time we want to add a version in the history.
+ * We can then roll back to a previous version.
+ *
+ * Note: This is not currently used in the project.
  */
 class Undo {
   // Number of currently available undo and redo snapshots
