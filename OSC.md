@@ -89,30 +89,6 @@ Brush 0 is a point shader. Brush 1, 2, 3, etc. are PNG files, randomly rotated.
 Brush 14 is an eraser. The size of the eraser is the same as the brushes.
 
 
-## undo
-
-Signature:
-`/undo ,i`
-
-Arguments:
-* Argument 1: spray identifier.
-
-Description:
-Undos the last stroke that ended.
-
-
-## redo
-
-Signature:
-`/redo ,i`
-
-Arguments:
-* Argument 1: spray identifier.
-
-Description:
-Redos the last thing undone. (see /undo)
-
-
 ## set force threshold
 
 Signature:
