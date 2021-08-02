@@ -24,7 +24,7 @@ class ImageBrush extends Brush {
     this._images.add(loadImage(image_file_name));
   }
   
-  public final void draw_brush(PGraphics buffer, float x, float y, float size, color colour) {
+  public final void draw_brush(PGraphics buffer, float x, float y, float size, color tint) {
     PImage chosen_image = null;
     if (this._images.size() == 0) {
       println("ImageBrush::draw_brush: Warning: No image loaded yet.");
@@ -38,8 +38,7 @@ class ImageBrush extends Brush {
     buffer.pushStyle();
     buffer.pushMatrix();
     //buffer.colorMode(RGB, 255);
-    // println("XXX: draw brush " + red(colour) + " " + green(colour) + " " + blue(colour) + " " + alpha(colour));
-    buffer.tint(red(colour), green(colour), blue(colour), alpha(colour));
+    buffer.tint(red(tint), green(tint), blue(tint), alpha(tint));
     buffer.translate(x, y);
     if (this._enable_rotation) {
       buffer.rotate(radians(random(0.0, 360.0)));
@@ -51,4 +50,3 @@ class ImageBrush extends Brush {
     buffer.popStyle();
   }
 }
-

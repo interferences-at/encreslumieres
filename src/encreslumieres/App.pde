@@ -512,6 +512,7 @@ class App {
       if (layer_number >= NUM_LAYERS) {
         println("Layer number too big: " + NUM_LAYERS);
       } else {
+        println("Put SprayCan " + spray_can_index + " to layer " + layer_number);
         Layer layer = this._layers.get(layer_number);
         spray_can.set_layer(layer);
       }
