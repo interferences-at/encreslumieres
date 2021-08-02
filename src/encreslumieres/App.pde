@@ -53,6 +53,7 @@ class App {
   ArrayList<SprayCan> _spray_cans;
   ArrayList<Brush> _brushes;
   ArrayList<Command> _commands;
+  ArrayList<Layer> _layers;
   boolean _mouse_is_pressed = false;
   boolean debug_force = false;
   
@@ -73,6 +74,14 @@ class App {
     this._load_brushes();
     //this._background_image = loadImage(BACKGROUND_IMAGE_NAME);
 
+    // Layers:
+    this._layers = new ArrayList<Layer>();
+    for (int i = 0; i < MAX_LAYER; i++) {
+      Layer item = new Layer(this._width, this._height);
+      this._layers.add(item);
+    }
+
+    // Spray cans:
     this._spray_cans = new ArrayList<SprayCan>();
     for (int i = 0; i < this.NUM_SPRAY_CANS; i++)
     {
@@ -488,7 +497,7 @@ class App {
   
   /**
    * Handles /layer OSC messages.
-   * @param layer_number index within the range [0,9]
+   * @param layer_number index within the range [0,MAX_LAYER]
    */
   private void handle_layer(int spray_can_index, int layer_number) {
     if (this.has_can_index(spray_can_index)) {
@@ -877,11 +886,12 @@ class App {
       }
     }
     
+    // Sets the layer of a spraycan
     else if (message.checkAddrPattern("/layer"))
     {
       if (message.checkTypetag("ii")) {
-        identifier = message.get(0).intValue();
-        int value = message.get(1).intValue();
+        identifier = message.get(0).intValue(); // spraycan
+        int value = message.get(1).intValue(); // layer
         this.handle_layer(identifier, value);
       }
     }
