@@ -184,8 +184,10 @@ Signature:
 /clear ,i
 
 Arguments:
-* Argument 1: layer index
+* Argument 1: spray can index
 
 Description:
-Clears a layer.
+Clears the layers a spray can is on.
+
+You might want to first set the layer of a spray can, so that you make sure you clear the right layer.
 
