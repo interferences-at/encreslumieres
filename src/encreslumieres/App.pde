@@ -580,13 +580,15 @@ class App {
   /**
    * Handles clear OSC messages.
    */
-  private void handle_clear(int layer_index) {
-    int useless_spraycan_arg = 0;
-    if (this.has_layer(layer_index)) {
+  private void handle_clear(int spray_can_index) {
+    if (this.has_can_index(spray_can_index)) {
+      SprayCan spray_can = this._spray_cans.get(spray_can_index);
+      Layer layerInstance = spray_can.get_layer();
+      int layer_index = this._layers.indexOf(layerInstance);
       this._push_command((Command)
-          new ClearCommand(useless_spraycan_arg, layer_index));
+          new ClearCommand(spray_can_index, layer_index));
     } else {
-      println("No such layer index " + layer_index);
+      println("No such spray can index: " + spray_can_index);
     }
   }
   
@@ -825,8 +827,8 @@ class App {
     else if (message.checkAddrPattern("/clear"))
     {
       if (message.checkTypetag("i")) {
-        int layer_index = message.get(0).intValue();
-        this.handle_clear(layer_index);
+        int spraycan_index = message.get(0).intValue();
+        this.handle_clear(spraycan_index);
       }
     }
     
