@@ -191,3 +191,14 @@ Clears the layers a spray can is on.
 
 You might want to first set the layer of a spray can, so that you make sure you clear the right layer.
 
+## clear layer
+
+Signature:
+/clear/layer ,i
+
+Arguments:
+* Argument 1: layer index in the range [1, N - 1]
+
+Description:
+Clears a layer.
+

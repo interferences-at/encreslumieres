@@ -29,7 +29,6 @@ class App {
   private final int MOUSE_GRAFFITI_IDENTIFIER = 0; // the index of the mouse spraycan
   //private final String BACKGROUND_IMAGE_NAME = "background.png"; // you can change the background image by changing this file
   private int DEFAULT_BRUSH_INDEX = 0;
-  private int DEFAULT_LAYER_INDEX = 0;
   /*
    * Now, the /force we receive from the Arduino over wifi is 
    * within the range [0,1023] and we invert the number, so that
@@ -60,7 +59,7 @@ class App {
   
   float MINIMUM_ALPHA = 0.0; // Here is the min/max alpha ratio according to force FSR pressure sensor
   float MAXIMUM_ALPHA = 0.6;
-  int NUM_LAYERS = 10;
+  int NUM_LAYERS = 6;
   
   /**
    * Constructor.
@@ -81,16 +80,16 @@ class App {
       Layer item = new Layer(this._width, this._height);
       this._layers.add(item);
     }
-    Layer defaultLayer = this._layers.get(this.DEFAULT_LAYER_INDEX);
 
     // Spray cans:
     this._spray_cans = new ArrayList<SprayCan>();
     for (int i = 0; i < this.NUM_SPRAY_CANS; i++)
     {
-      SprayCan item = new SprayCan(this._width, this._height, defaultLayer);
+      // By default, each painter is on its own layer. (0, 1, 2, 3, 4, 5, 6)
+      Layer layerForThisPainter = this._layers.get(i); // There should be enough layers!
+      SprayCan item = new SprayCan(this._width, this._height, layerForThisPainter);
       item.set_color(color(255, 255, 255, 255)); // default color is orange
       item.set_current_brush(this._brushes.get(this.DEFAULT_BRUSH_INDEX));
-      item.set_layer(defaultLayer);
       this._spray_cans.add(item);
     }
     
@@ -476,8 +475,7 @@ class App {
     }
   }
   
-  private float _map_force_to_alpha_ratio(float value)
-  {
+  private float _map_force_to_alpha_ratio(float value) {
     float ret = map(value, this._force_threshold, this.FORCE_MAX, MINIMUM_ALPHA, MAXIMUM_ALPHA);
     ret = min(ret, 1.0);
     ret = max(ret, 0.0); // clip within [0,1]
@@ -590,6 +588,28 @@ class App {
     } else {
       println("No such spray can index: " + spray_can_index);
     }
+  }
+
+  /**
+   * Handles clear/layer OSC messages.
+   *
+   * The layer index start at 1. (not 0)
+   * (1, 2, 3, 4, 5, 6)
+   */
+  private void handle_clear_layer(int layer_index) {
+    int index = this.convert_external_index_to_internal(layer_index, NUM_LAYERS);
+    this.apply_clear(index);
+  }
+
+  /**
+   * Converts a number from the [1, N] range to the [0, N - 1] range.
+   *
+   * @param index Number to convert.
+   * @param num_elements Number of elements in the list.
+   */
+  private int convert_external_index_to_internal(int index, int num_elements) {
+    int ret = (index - 1) % num_elements;
+    return ret;
   }
   
   /**
@@ -823,12 +843,21 @@ class App {
       }
     }
     
-     // ---  /clear ---
+    // ---  /clear ---
     else if (message.checkAddrPattern("/clear"))
     {
       if (message.checkTypetag("i")) {
         int spraycan_index = message.get(0).intValue();
         this.handle_clear(spraycan_index);
+      }
+    }
+
+    // ---  /clear/layer ---
+    else if (message.checkAddrPattern("/clear/layer"))
+    {
+      if (message.checkTypetag("i")) {
+        int layer_index = message.get(0).intValue(); // In the range [1, N - 1]
+        this.handle_clear_layer(layer_index);
       }
     }
     
