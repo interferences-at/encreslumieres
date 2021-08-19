@@ -602,6 +602,16 @@ class App {
   }
 
   /**
+   * Clears all layers.
+   */
+  private void handle_clear_all() {
+    for (int i = 0; i < NUM_LAYERS; i++) {
+      Layer layer = this._layers.get(i);
+      layer.clear_layer();
+    }
+  }
+
+  /**
    * Converts a number from the [1, N] range to the [0, N - 1] range.
    *
    * @param index Number to convert.
@@ -861,6 +871,12 @@ class App {
       }
     }
     
+    // --- /clear/all
+    else if (message.checkAddrPattern("/clear/all"))
+    {
+      this.handle_clear_all();
+    }
+
     else if (message.checkAddrPattern("/set/force/threshold"))
     {
       if (message.checkTypetag("i")) {
