@@ -129,11 +129,18 @@ class SprayCan {
    */
   public void draw_spraycan() {
     PGraphics buffer = this._layer.get_buffer();
+    boolean somethingToDraw = false; // We add to our layer only if we need to.
     buffer.beginDraw();
     for (Stroke stroke : this._strokes) {
-      stroke.draw_stroke(buffer);
+      boolean didDraw = stroke.draw_stroke(buffer);
+      if (didDraw) {
+        somethingToDraw = true;
+      }
     }
-    image(buffer, 0, 0);
+    if (somethingToDraw) {
+      image(buffer, 0, 0);
+      this._layer.set_has_something_to_draw_true();
+    }
     buffer.endDraw();
   }
   
