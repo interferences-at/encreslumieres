@@ -202,3 +202,11 @@ Arguments:
 Description:
 Clears a layer.
 
+## clear all
+
+Signature:
+/clear/all
+
+Description:
+Clears all layers.
+
