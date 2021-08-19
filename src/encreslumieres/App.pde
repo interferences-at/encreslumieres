@@ -315,7 +315,7 @@ class App {
     // Draw each layer to the main window, starting from layer 0:
     for (int layer_index = 0; layer_index < NUM_LAYERS; layer_index++) {
       Layer layer = this._layers.get(layer_index);
-      layer.draw_layer();
+      layer.draw_layer(); // Only actually draws it if it has some pixels in it.
     }
     // we do not care about the layer number for the rendering order of the cursors
     for (int spraycan_index = 0; spraycan_index < this._spray_cans.size(); spraycan_index++) {
