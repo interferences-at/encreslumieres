@@ -8,13 +8,15 @@ class Layer {
   private int _image_width; // sketch size
   private int _image_height; // sketch size
   private boolean _has_something_to_draw = false;
+  private String _renderer = P2D;
 
   /**
    * Constructor.
    */
-  public Layer(int image_width, int image_height) {
+  public Layer(int image_width, int image_height, String renderer) {
     this._image_width = image_width;
     this._image_height = image_height;
+    this._renderer = renderer;
     this.clear_layer(); // Creates the this._buffer
   }
 
@@ -40,7 +42,7 @@ class Layer {
    * Clears this whole layer.
    */
   public void clear_layer() {
-    this._buffer = createGraphics(this._image_width, this._image_height);
+    this._buffer = createGraphics(this._image_width, this._image_height, this._renderer);
     this._buffer.colorMode(RGB, 255);
     this._buffer.beginDraw();
     this._buffer.background(0, 0, 0, 0); // Transparent black.
@@ -55,4 +57,3 @@ class Layer {
     return _buffer;
   }
 }
-
