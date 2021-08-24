@@ -8,6 +8,7 @@
 //final String SYPHON_SERVER_NAME = "encres&lumieres";
 final String SPOUT_SERVER_NAME = "encres&lumieres";
 final int OSC_RECEIVE_PORT = 8888;
+final String renderer = P2D;
 
 // variables
 App app;
@@ -18,14 +19,14 @@ App app;
 // Spout spout;
 
 void settings() {
-  size(1920, 1080, P3D);
+  size(1920, 1080, renderer);
   // XXX comment out next line if not using Syphon (macOS-only)
   //PJOGL.profile = 1;
 }
 
 void setup() {
   frameRate(60);
-  app = new App(width, height);
+  app = new App(width, height, renderer);
   app.set_osc_receive_port(OSC_RECEIVE_PORT); // Must be called before app.setup_cb()
   app.set_sketch_size(width, height);
   app.setup_cb(); // Make sure to call app.set_osc_receive_port(...) first.

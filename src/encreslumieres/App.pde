@@ -29,6 +29,7 @@ class App {
   private final int MOUSE_GRAFFITI_IDENTIFIER = 0; // the index of the mouse spraycan
   //private final String BACKGROUND_IMAGE_NAME = "background.png"; // you can change the background image by changing this file
   private int DEFAULT_BRUSH_INDEX = 0;
+  private String _renderer = P2D;
   /*
    * Now, the /force we receive from the Arduino over wifi is 
    * within the range [0,1023] and we invert the number, so that
@@ -66,9 +67,10 @@ class App {
    * 
    * See this.setup_cb() for more initialization. (OSC receiver, etc.)
    */
-  public App(int canvasWidth, int canvasHeight) {
+  public App(int canvasWidth, int canvasHeight, String renderer) {
     this._width = canvasWidth;
     this._height = canvasHeight;
+    this._renderer = renderer;
     this._brushes = new ArrayList<Brush>();
     this._commands = new ArrayList<Command>();
     this._load_brushes();
@@ -77,7 +79,7 @@ class App {
     // Layers:
     this._layers = new ArrayList<Layer>();
     for (int i = 0; i < NUM_LAYERS; i++) {
-      Layer item = new Layer(this._width, this._height);
+      Layer item = new Layer(this._width, this._height, this._renderer);
       this._layers.add(item);
     }
 
