@@ -210,3 +210,25 @@ Signature:
 Description:
 Clears all layers.
 
+## enable
+Signatures:
+* /enable ,si
+* /enable ,sT
+* /enable ,sF
+
+Arguments:
+* Argument 1: Key ("clear_painter")
+* Argument 2: 0 or 1 (or a boolean typetag)
+
+Description:
+Enables or disables an option.
+Providing 0 as a int disables it, and 1 enables it.
+Boolean typetags are also supported.
+Floats are also supported. (0.0 means false and 1.0 means true)
+
+Here is the list of supported options:
+- clear_painter
+
+Examples:
+* /enable ,si clear_painter 0
+
