@@ -4,7 +4,6 @@ Notes:
 * Use 0 for the default spray identifier. (the one controlled by the mouse)
 * Often, either float or int arguments are accepted. (but they must all be either float or int)
 
-
 ## blob
 
 Signature:
@@ -20,7 +19,6 @@ Description:
 The blob is the position of the infrared LED as seen by the video camera. Its
 position moves around the brush.
 See the blobdetective software.
-
 
 ## /N/raw - force
 
@@ -57,7 +55,6 @@ Arguments:
 Description:
 Sets the color of a brush.
 
-
 ## brush weight
 
 Signatures:
@@ -88,7 +85,6 @@ Brush 0 is a point shader. Brush 1, 2, 3, etc. are PNG files, randomly rotated.
 
 Brush 14 is an eraser. The size of the eraser is the same as the brushes.
 
-
 ## set force threshold
 
 Signature:
@@ -101,7 +97,6 @@ Description:
 Changes the FSR sensor on/off threshold value.
 It's the same for all spray cans.
 
-
 ## set step size
 
 Signature:
@@ -112,7 +107,6 @@ Arguments:
 
 Description:
 Sets the minimum distance between interpolated positions of nodes. (in pixels)
-
 
 ## scale factor
 
@@ -128,7 +122,6 @@ Sets the scale factor (within the range [0,1]) for a spray can.
 The default is 1.0
 A scale factor of 1.0 means that we use the full sketch area.
 A scale factor of 0.1 means that we can only paint in 1/10 of the sketch area.
-
 
 ## scale center
 
@@ -146,7 +139,6 @@ The default is (0.5, 0.5)
 For the Y scale, 0.0 is the top of the sketch and 1.0 is the bottom.
 For the X scale, 0.0 is the left of the sketch and 1.0 is the right.
 
-
 ## layer
 
 Signature:
@@ -161,22 +153,6 @@ Sets the layer for a spray can.
 The default for all spray cans is 0.
 If the layer of a spray is 9, it will be drawn over all spray cans whose layer
 number if smaller than 9.
-
-
-## link strokes
-
-Signature:
-`/link_strokes ,ii`
-
-Arguments:
-* Argument 1: spray identifier
-* Argument 2: enable it (1 enables it, 0 disables it)
-
-Description:
-Enables of disables the linked strokes for a spray can.
-The default for all spray cans is disabled.
-Every new stroke will be linked to the previous one with a straigth line, if
-enabled.
 
 ## clear
 
@@ -211,6 +187,7 @@ Description:
 Clears all layers.
 
 ## enable
+
 Signatures:
 * /enable ,si
 * /enable ,sT

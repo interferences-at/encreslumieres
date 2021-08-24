@@ -7,7 +7,6 @@
 // constants
 //final String SYPHON_SERVER_NAME = "encres&lumieres";
 final String SPOUT_SERVER_NAME = "encres&lumieres";
-final boolean VERBOSE = false;
 final int OSC_RECEIVE_PORT = 8888;
 
 // variables
@@ -28,7 +27,6 @@ void setup() {
   frameRate(60);
   app = new App(width, height);
   app.set_osc_receive_port(OSC_RECEIVE_PORT); // Must be called before app.setup_cb()
-  app.set_verbose(VERBOSE);
   app.set_sketch_size(width, height);
   app.setup_cb(); // Make sure to call app.set_osc_receive_port(...) first.
   
@@ -63,4 +61,3 @@ void keyPressed() {
 void keyReleased() {
   app.keyReleased_cb();
 }
-
