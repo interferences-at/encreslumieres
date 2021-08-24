@@ -42,7 +42,6 @@ class App {
   int _force_threshold = 300; // Please change this! FSR threshold. (FSR is in the range [0,1023]
 
   // private attributes
-  private boolean _verbose = false;
   private boolean _enable_clear_painter = true;
   private int _osc_receive_port = 8888;
   private int _width = 1920; // window width
@@ -60,7 +59,7 @@ class App {
   
   float MINIMUM_ALPHA = 0.0; // Here is the min/max alpha ratio according to force FSR pressure sensor
   float MAXIMUM_ALPHA = 0.6;
-  int NUM_LAYERS = 6;
+  int NUM_LAYERS = 6; // Must be greater than NUM_SPRAY_CANS
   
   /**
    * Constructor.
@@ -88,7 +87,7 @@ class App {
     {
       // By default, each painter is on its own layer. (0, 1, 2, 3, 4, 5, 6)
       Layer layerForThisPainter = this._layers.get(i); // There should be enough layers!
-      SprayCan item = new SprayCan(this._width, this._height, layerForThisPainter);
+      SprayCan item = new SprayCan(layerForThisPainter);
       item.set_color(color(255, 255, 255, 255)); // default color is orange
       item.set_current_brush(this._brushes.get(this.DEFAULT_BRUSH_INDEX));
       this._spray_cans.add(item);
@@ -254,10 +253,6 @@ class App {
     }
   }
 
-  public void set_verbose(boolean value) {
-    this._verbose = value;
-  }
-
   /**
    * Sets the OSC receive port number.
    * Call this before calling setup_cb().
@@ -324,27 +319,10 @@ class App {
     }
   }
 
-  private void log_debug(String message) {
-    if (this._verbose) {
-      println(message);
-    }
-  }
-
-  private void log_info(String message) {
-    println(message);
-  }
-
   public void mousePressed_cb(float mouse_x, float mouse_y) {
     this._mouse_is_pressed = true;
-    
-    if (this._spray_cans.get(MOUSE_GRAFFITI_IDENTIFIER).get_enable_linked_strokes()) {
-      // no need to add a new node, since it will be added in the blob cb.
-      //this._push_command((Command)
-      //    new AddNodeCommand(MOUSE_GRAFFITI_IDENTIFIER, x, y));
-    } else {
-      this._push_command((Command)
-          new NewStrokeCommand(MOUSE_GRAFFITI_IDENTIFIER));
-    }
+    this._push_command((Command)
+        new NewStrokeCommand(MOUSE_GRAFFITI_IDENTIFIER, mouse_x, mouse_y));
   }
 
   public void mouseReleased_cb(float mouse_x, float mouse_y) {
@@ -353,17 +331,13 @@ class App {
   }
 
   public void keyPressed_cb() {
-    if (key == CODED && keyCode == SHIFT) {
-      this.handle_enable_linked_strokes(MOUSE_GRAFFITI_IDENTIFIER, true);
-    } else if (key == 'x' || key == 'X') {
+    if (key == 'x' || key == 'X') {
       this.handle_clear(MOUSE_GRAFFITI_IDENTIFIER);
     }
   }
   
   public void keyReleased_cb() {
-    if (key == CODED && keyCode == SHIFT) {
-      this.handle_enable_linked_strokes(MOUSE_GRAFFITI_IDENTIFIER, true);
-    }
+    // Nothing to do
   }
   
   /**
@@ -555,22 +529,9 @@ class App {
         }
         
         // create the new stroke - or just add a new node in the previous stroke if linked strokes are enabled
-        if (spray_can.get_enable_linked_strokes()) {
-          // nothing to do
-        } else {
-          this._push_command((Command)
-              new NewStrokeCommand(spray_can_index)); // TODO: should we already create the first node, for faster response?
-        }
+        this._push_command((Command)
+            new NewStrokeCommand(spray_can_index)); // TODO: should we already create the first node, for faster response?
       }
-    } else {
-      println("No such can index " + spray_can_index);
-    }
-  }
-  
-  private void handle_enable_linked_strokes(int spray_can_index, boolean enable) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      spray_can.set_enable_linked_strokes(enable);
     } else {
       println("No such can index " + spray_can_index);
     }
@@ -927,15 +888,6 @@ class App {
         identifier = message.get(0).intValue(); // spraycan
         int value = message.get(1).intValue(); // layer
         this.handle_layer(identifier, value);
-      }
-    }
-    
-    else if (message.checkAddrPattern("/link_strokes"))
-    {
-      if (message.checkTypetag("ii")) {
-        identifier = message.get(0).intValue();
-        boolean value = message.get(1).intValue() == 1;
-        this.handle_enable_linked_strokes(identifier, value);
       }
     }
 

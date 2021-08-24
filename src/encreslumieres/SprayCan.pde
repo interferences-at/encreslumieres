@@ -11,8 +11,6 @@ class SprayCan {
   private color _color; // Current color
   private float _brush_weight = DEFAULT_BRUSH_WEIGHT; // Set for each can using OSC messages.
   private Brush _current_brush; // Instance of a Brush to draw on our buffer
-  private int _image_width; // sketch size
-  private int _image_height; // sketch size
   private float _default_step_size; // how many pixels between each brush drawn - interpolated. See PointShaderBrush
   private float _cursor_x = 0.0; // blob X
   private float _cursor_y = 0.0; // blob Y
@@ -23,21 +21,18 @@ class SprayCan {
   private float _scale_center_y = 0.5;
   private float _scale_factor = 1.0;
   private Layer _layer;
-  private boolean _enable_linked_strokes = false;
 
   /**
    * Represents a spray can.
    * There can be up to a few cans drawing at the same time.
    * Each can sends OSC messages via the Wifi network. (/blob position, /force amount, /color, etc.)
    */
-  public SprayCan(int image_width, int image_height, Layer layer) {
+  public SprayCan(Layer layer) {
     this._strokes = new ArrayList<Stroke>();
     this._layer = layer;
     this._color = color(255, 255, 255, 255);
     //this._brush_size = this.DEFAULT_BRUSH_SIZE; // FIXME
     this._default_step_size = this.DEFAULT_STEP_SIZE;
-    this._image_width = image_width;
-    this._image_height = image_height;
     this.clear_all_strokes();
   }
   
@@ -78,14 +73,6 @@ class SprayCan {
   
   public Layer get_layer() {
     return this._layer;
-  }
-  
-  public void set_enable_linked_strokes(boolean value) {
-    this._enable_linked_strokes = value;
-  }
-  
-  public boolean get_enable_linked_strokes() {
-    return this._enable_linked_strokes;
   }
 
   /**
