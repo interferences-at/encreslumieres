@@ -43,6 +43,7 @@ class App {
 
   // private attributes
   private boolean _verbose = false;
+  private boolean _enable_clear_painter = true;
   private int _osc_receive_port = 8888;
   private int _width = 1920; // window width
   private int _height = 1080; // window height
@@ -577,8 +578,14 @@ class App {
 
   /**
    * Handles clear OSC messages.
+   *
+   * Only effective if _enable_clear_painter is true.
+   * @see set_enable_clear_painter
    */
   private void handle_clear(int spray_can_index) {
+    if (this._enable_clear_painter == false) {
+      return;
+    }
     if (this.has_can_index(spray_can_index)) {
       SprayCan spray_can = this._spray_cans.get(spray_can_index);
       Layer layerInstance = spray_can.get_layer();
@@ -932,10 +939,52 @@ class App {
       }
     }
 
+    // /enable clear_painter 1
+    else if (message.checkAddrPattern("/enable")) {
+      // Parse the second arg as a boolean:
+      boolean bool_value = true;
+      if (message.checkTypetag("sf")) {
+        float float_value = message.get(1).floatValue();
+        if (float_value >= 0.9999) {
+          bool_value = true;
+        } else {
+          bool_value = false;
+        }
+      }
+      else if (message.checkTypetag("si")) {
+        int int_value = message.get(1).intValue();
+        if (int_value >= 1) {
+          bool_value = true;
+        } else {
+          bool_value = false;
+        }
+      } else if (message.checkTypetag("sT")) {
+        bool_value = true;
+      } else if (message.checkTypetag("sF")) {
+        bool_value = false;
+      } else {
+        println("Unsupported OSC typetags: /enable ," + message.typetag());
+        return; // XXX important. Otherwise, we might crash when parsing arg 0, below.
+      }
+      String config_key = message.get(0).stringValue();
+      if (config_key.matches("clear_painter")) {
+        this.set_enable_clear_painter(bool_value);
+      } else {
+        println("Unsupported config key: /enable ," + config_key);
+      }
+    }
+
     // fallback
     else
     {
       println("Unknown OSC message.");
     }
+  }
+
+  /**
+   * Enables or disable clearing per painter.
+   */
+  private void set_enable_clear_painter(boolean value) {
+    this._enable_clear_painter = value;
   }
 }
