@@ -1,11 +1,15 @@
 # Encres & Lumieres release notes
 
-## 2021-07-?? - 2.0.0
+## 2021-08-25 - 2.0.0
+- Rename SprayCan to Painter
+- Use the P2D renderer for the layers.
+- Separate the layers from the painters.
+- Remove linked strokes.
+- Remove the undo and the zoom.
+- Attempt to fix the undesired dark contour effect around each stroke.
 - Refactor of the OSC for the new devices:
 
-### To trigger the paint can
-
-It used to be:
+To trigger the painter, it used to be:
 
 ```
 /force ii
@@ -21,9 +25,7 @@ We now have:
 /5/raw ,ffffffffffffffffffffff - 12:force
 ```
 
-### For the position of the spray can
-
-It used to be:
+For the position of the spray can, it used to be:
 
 ```
 /blob ,ifff - 1:x 2:y 3:size
@@ -35,7 +37,6 @@ We now have:
 /blob ,iiii - 1:x 2:y 3:size
 ```
 
-## Input
 The input dimension is 720x480. (it was 640x480)
 
 The force is now within 0-1070 and the threshold is 300.
