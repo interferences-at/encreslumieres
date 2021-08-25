@@ -25,7 +25,7 @@ class App {
   private final String OSC_SEND_HOST = "127.0.0.1";
   private final int BLOB_INPUT_WIDTH = 720; // The PS3 Eye camera is 640x480
   private final int BLOB_INPUT_HEIGHT = 480; // and blobdetective sends us the blob position in that range
-  private final int NUM_SPRAY_CANS = 6; // maximum number of spraycans - not too many is more optimized
+  private final int NUM_PAINTERS = 6; // maximum number of spraycans - not too many is more optimized
   private final int MOUSE_GRAFFITI_IDENTIFIER = 0; // the index of the mouse spraycan
   //private final String BACKGROUND_IMAGE_NAME = "background.png"; // you can change the background image by changing this file
   private int DEFAULT_BRUSH_INDEX = 0;
@@ -51,7 +51,7 @@ class App {
   // PImage _background_image;
   OscP5 _osc_receiver;
   NetAddress _osc_send_address;
-  ArrayList<SprayCan> _spray_cans;
+  ArrayList<Painter> _painters;
   ArrayList<Brush> _brushes;
   ArrayList<Command> _commands;
   ArrayList<Layer> _layers;
@@ -60,7 +60,7 @@ class App {
   
   float MINIMUM_ALPHA = 0.0; // Here is the min/max alpha ratio according to force FSR pressure sensor
   float MAXIMUM_ALPHA = 0.6;
-  int NUM_LAYERS = 6; // Must be greater than NUM_SPRAY_CANS
+  int NUM_LAYERS = 6; // Must be greater than NUM_PAINTERS
   
   /**
    * Constructor.
@@ -84,22 +84,22 @@ class App {
     }
 
     // Spray cans:
-    this._spray_cans = new ArrayList<SprayCan>();
-    for (int i = 0; i < this.NUM_SPRAY_CANS; i++)
+    this._painters = new ArrayList<Painter>();
+    for (int i = 0; i < this.NUM_PAINTERS; i++)
     {
       // By default, each painter is on its own layer. (0, 1, 2, 3, 4, 5, 6)
       Layer layerForThisPainter = this._layers.get(i); // There should be enough layers!
-      SprayCan item = new SprayCan(layerForThisPainter);
+      Painter item = new Painter(layerForThisPainter);
       item.set_color(color(255, 255, 255, 255)); // default color is orange
       item.set_current_brush(this._brushes.get(this.DEFAULT_BRUSH_INDEX));
-      this._spray_cans.add(item);
+      this._painters.add(item);
     }
     
     // XXX See this.setup_cb() for more initialization. (OSC receiver, etc.)
   }
   
   public void set_force_threshold(int value) {
-    // TODO: we could have a different force threshold for each spraycan
+    // TODO: we could have a different force threshold for each Painter
     this._force_threshold = value;
   }
   
@@ -226,8 +226,8 @@ class App {
   /**
    * Checks if a given spray can index exists.
    */
-  public boolean has_can_index(int spray_can_index) {
-    return (0 <= spray_can_index && spray_can_index < this.NUM_SPRAY_CANS);
+  public boolean has_painter_index(int spray_can_index) {
+    return (0 <= spray_can_index && spray_can_index < this.NUM_PAINTERS);
   }
 
   /**
@@ -241,12 +241,12 @@ class App {
    * Chooses a brush for a given spray can.
    */
   public boolean choose_brush(int spray_can_index, int brush_index) {
-    if (has_can_index(spray_can_index)) {
+    if (has_painter_index(spray_can_index)) {
       if (brush_index >= this._brushes.size()) {
         println("Warning: no such brush index: " + brush_index); 
         return false;
       } else {
-        this._spray_cans.get(spray_can_index).set_current_brush(this._brushes.get(brush_index));
+        this._painters.get(spray_can_index).set_current_brush(this._brushes.get(brush_index));
         return true;
       }
     } else {
@@ -305,9 +305,9 @@ class App {
     this._consume_commands();
     
     // Render the spray cans, each to its own layer:
-    for (int spraycan_index = 0; spraycan_index < this._spray_cans.size(); spraycan_index++) {
-      SprayCan spraycan = this._spray_cans.get(spraycan_index);
-      spraycan.draw_spraycan();
+    for (int painter_index = 0; painter_index < this._painters.size(); painter_index++) {
+      Painter spraycan = this._painters.get(painter_index);
+      spraycan.draw_painter();
     }
     // Draw each layer to the main window, starting from layer 0:
     for (int layer_index = 0; layer_index < NUM_LAYERS; layer_index++) {
@@ -315,9 +315,9 @@ class App {
       layer.draw_layer(); // Only actually draws it if it has some pixels in it.
     }
     // we do not care about the layer number for the rendering order of the cursors
-    for (int spraycan_index = 0; spraycan_index < this._spray_cans.size(); spraycan_index++) {
-      SprayCan spraycan = this._spray_cans.get(spraycan_index);
-      spraycan.draw_cursor();
+    for (int painter_index = 0; painter_index < this._painters.size(); painter_index++) {
+      Painter painter = this._painters.get(painter_index);
+      painter.draw_cursor();
     }
   }
 
@@ -345,10 +345,10 @@ class App {
   /**
    * Convert a X coordinate from blob range to display range.
    */
-  private float map_x(int spray_can_index, float value) {
-    SprayCan spray_can = this._spray_cans.get(spray_can_index);
-    float scale_center_x = spray_can.get_scale_center_x();
-    float scale_factor = spray_can.get_scale_factor();
+  private float map_x(int painter_index, float value) {
+    Painter painter = this._painters.get(painter_index);
+    float scale_center_x = painter.get_scale_center_x();
+    float scale_factor = painter.get_scale_factor();
     
     float from_x = (this._width * scale_center_x) - (this._width / 2.0 * scale_factor);
     float to_x = (this._width * scale_center_x) + (this._width / 2.0 * scale_factor);
@@ -358,11 +358,11 @@ class App {
   /**
    * Convert a Y coordinate from blob range to display range.
    */
-  private float map_y(int spray_can_index, float value) {
+  private float map_y(int painter_index, float value) {
     float height_3_4 = this._width * (3.0 / 4.0);
-    SprayCan spray_can = this._spray_cans.get(spray_can_index);
-    float scale_center_y = spray_can.get_scale_center_y();
-    float scale_factor = spray_can.get_scale_factor();
+    Painter painter = this._painters.get(painter_index);
+    float scale_center_y = painter.get_scale_center_y();
+    float scale_factor = painter.get_scale_factor();
     
     float from_y = (height_3_4 * scale_center_y) - (height_3_4 / 2.0 * scale_factor);
     float to_y = (height_3_4 * scale_center_y) + (height_3_4 / 2.0 * scale_factor);
@@ -372,12 +372,12 @@ class App {
   /**
    * Handles /color OSC messages.
    */
-  private void handle_color(int spray_can_index, int r, int g, int b, int a) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      spray_can.set_color(color(r, g, b, a));
+  private void handle_color(int painter_index, int r, int g, int b, int a) {
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
+      painter.set_color(color(r, g, b, a));
     } else {
-      println("No such can index " + spray_can_index);
+      println("No such painter index " + painter_index);
     }
   }
   
@@ -389,24 +389,24 @@ class App {
    * @param x: range [0,1]
    * @param y: range [0,1]
    */
-  private void handle_scale_center(int spray_can_index, float x, float y) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      spray_can.set_scale_center(x, y);
+  private void handle_scale_center(int painter_index, float x, float y) {
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
+      painter.set_scale_center(x, y);
     } else {
-      println("No such can index " + spray_can_index);
+      println("No such painter index " + painter_index);
     }
   }
   
   /**
    * @param factor: range [0,1] How big the scaled window will be. (1 is the default)
    */
-  private void handle_scale_factor(int spray_can_index, float factor) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      spray_can.set_scale_factor(factor);
+  private void handle_scale_factor(int painter_index, float factor) {
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
+      painter.set_scale_factor(factor);
     } else {
-      println("No such can index " + spray_can_index);
+      println("No such can index " + painter_index);
     }
   }
 
@@ -414,41 +414,41 @@ class App {
    * Handles /set/step_size OSC messages.
    * For distance between each brush. (in pixels)
    */
-  private void handle_set_step_size(int spray_can_index, float value) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      spray_can.set_step_size(value);
+  private void handle_set_step_size(int painter_index, float value) {
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
+      painter.set_step_size(value);
     } else {
-      println("No such can index " + spray_can_index);
+      println("No such painter index " + painter_index);
     }
   }
 
   /**
    * Handles /brush/weight OSC messages.
    */
-  private void handle_brush_weight(int spray_can_index, int weight) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      spray_can.set_brush_weight(weight);
+  private void handle_brush_weight(int painter_index, int weight) {
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
+      painter.set_brush_weight(weight);
     } else {
-      println("No such can index " + spray_can_index);
+      println("No such painter index " + painter_index);
     }
   }
   
   /**
    * Handles /brush/choice OSC messages.
    */
-  private void handle_brush_choice(int spray_can_index, int brush_index) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
+  private void handle_brush_choice(int painter_index, int brush_index) {
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
       if (brush_index >= this._brushes.size()) {
         println("no such brush index " + brush_index);
       } else {
         Brush brush = this._brushes.get(brush_index);
-        spray_can.set_current_brush(brush);
+        painter.set_current_brush(brush);
       }
     } else {
-      println("No such can index " + spray_can_index);
+      println("No such painter index " + painter_index);
     }
   }
   
@@ -462,18 +462,18 @@ class App {
   /**
    * Handles /blob OSC messages.
    */
-  private void handle_blob(int spray_can_index, int x, int y, int size) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      float mapped_x = this.map_x(spray_can_index, x);
-      float mapped_y = this.map_y(spray_can_index, y);
+  private void handle_blob(int painter_index, int x, int y, int size) {
+    if (this.has_painter_index(painter_index)) {
+      Painter spray_can = this._painters.get(painter_index);
+      float mapped_x = this.map_x(painter_index, x);
+      float mapped_y = this.map_y(painter_index, y);
       spray_can.set_cursor_x_y_size(mapped_x, mapped_y, size);
       if (spray_can.get_is_spraying()) {
         this._push_command((Command)
-            new AddNodeCommand(spray_can_index, mapped_x, mapped_y, size));
+            new AddNodeCommand(painter_index, mapped_x, mapped_y, size));
       }
     } else {
-      println("No such can index " + spray_can_index);
+      println("No such painter index " + painter_index);
     }
   }
   
@@ -481,18 +481,18 @@ class App {
    * Handles /layer OSC messages.
    * @param layer_number index within the range [0,NUM_LAYERS-1]
    */
-  private void handle_layer(int spray_can_index, int layer_number) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
+  private void handle_layer(int painter_index, int layer_number) {
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
       if (layer_number >= NUM_LAYERS) {
         println("Layer number too big: " + NUM_LAYERS);
       } else {
-        println("Put SprayCan " + spray_can_index + " to layer " + layer_number);
+        println("Put SprayCan " + painter_index + " to layer " + layer_number);
         Layer layer = this._layers.get(layer_number);
-        spray_can.set_layer(layer);
+        painter.set_layer(layer);
       }
     } else {
-      println("No such can index " + spray_can_index);
+      println("No such painter index " + painter_index);
     }
   }
   
@@ -511,20 +511,19 @@ class App {
   /**
    * Handles /force OSC messages.
    */
-  private void handle_force(int spray_can_index, float force) {
+  private void handle_force(int painter_index, float force) {
     // Invert the number (only once here)
     //force = FORCE_MAX - force;
 
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
       if (this.debug_force) {
-        // println("INDEX: " + spray_can_index);
         println("FORCE: " + force);
       }
       boolean is_pressed = this._force_to_is_pressed(force);
-      boolean was_pressed = spray_can.get_is_spraying();
-      spray_can.set_is_spraying(is_pressed);
-      spray_can.set_alpha_ratio(this._map_force_to_alpha_ratio(force));
+      boolean was_pressed = painter.get_is_spraying();
+      painter.set_is_spraying(is_pressed);
+      painter.set_alpha_ratio(this._map_force_to_alpha_ratio(force));
       if (! was_pressed && is_pressed) {
         if (this.debug_force) {
           println("FORCE: NEW STROKE");
@@ -532,10 +531,10 @@ class App {
         
         // create the new stroke - or just add a new node in the previous stroke if linked strokes are enabled
         this._push_command((Command)
-            new NewStrokeCommand(spray_can_index)); // TODO: should we already create the first node, for faster response?
+            new NewStrokeCommand(painter_index)); // TODO: should we already create the first node, for faster response?
       }
     } else {
-      println("No such can index " + spray_can_index);
+      println("No such painter index " + painter_index);
     }
   }
 
@@ -545,18 +544,18 @@ class App {
    * Only effective if _enable_clear_painter is true.
    * @see set_enable_clear_painter
    */
-  private void handle_clear(int spray_can_index) {
+  private void handle_clear(int painter_index) {
     if (this._enable_clear_painter == false) {
       return;
     }
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      Layer layerInstance = spray_can.get_layer();
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
+      Layer layerInstance = painter.get_layer();
       int layer_index = this._layers.indexOf(layerInstance);
       this._push_command((Command)
-          new ClearCommand(spray_can_index, layer_index));
+          new ClearCommand(painter_index, layer_index));
     } else {
-      println("No such spray can index: " + spray_can_index);
+      println("No such painter index: " + painter_index);
     }
   }
 
@@ -595,48 +594,48 @@ class App {
   /**
    * Called by a command.
    */
-  public void apply_add_node(int spray_can_index, float x, float y) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      spray_can.add_node(x, y);
+  public void apply_add_node(int painter_index, float x, float y) {
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
+      painter.add_node(x, y);
     } else {
-      println("Warning: No such spray can: " + spray_can_index);
+      println("Warning: No such spray can: " + painter_index);
     }
   }
   
   /**
    * Called by a command.
    */
-  public void apply_new_stroke(int spray_can_index) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      spray_can.start_new_stroke();
+  public void apply_new_stroke(int painter_index) {
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
+      painter.start_new_stroke();
     } else {
-      println("Warning: No such spray can: " + spray_can_index);
+      println("Warning: No such spray can: " + painter_index);
     }
   }
   
   /**
    * Called by a command.
    */
-  public void apply_new_stroke(int spray_can_index, float x, float y) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      spray_can.start_new_stroke(x, y);
+  public void apply_new_stroke(int painter_index, float x, float y) {
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
+      painter.start_new_stroke(x, y);
     } else {
-      println("Warning: No such spray can: " + spray_can_index);
+      println("Warning: No such painter: " + painter_index);
     }
   }
   
   /**
    * Called by a command.
    */
-  public void apply_new_stroke(int spray_can_index, float x, float y, float size) {
-    if (this.has_can_index(spray_can_index)) {
-      SprayCan spray_can = this._spray_cans.get(spray_can_index);
-      spray_can.start_new_stroke(x, y, size);
+  public void apply_new_stroke(int painter_index, float x, float y, float size) {
+    if (this.has_painter_index(painter_index)) {
+      Painter painter = this._painters.get(painter_index);
+      painter.start_new_stroke(x, y, size);
     } else {
-      println("Warning: No such spray can: " + spray_can_index);
+      println("Warning: No such painter: " + painter_index);
     }
   }
   
@@ -887,7 +886,7 @@ class App {
     else if (message.checkAddrPattern("/layer"))
     {
       if (message.checkTypetag("ii")) {
-        identifier = message.get(0).intValue(); // spraycan
+        identifier = message.get(0).intValue(); // painter
         int value = message.get(1).intValue(); // layer
         this.handle_layer(identifier, value);
       }

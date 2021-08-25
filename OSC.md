@@ -1,7 +1,7 @@
 # OSC message signatures for Encres & Lumieres
 
 Notes:
-* Use 0 for the default spray identifier. (the one controlled by the mouse)
+* Use 0 for the default painter identifier. (the one controlled by the mouse)
 * Often, either float or int arguments are accepted. (but they must all be either float or int)
 
 ## blob
@@ -10,7 +10,7 @@ Signature:
 * `/blob ,iiii`
 
 Arguments:
-* Argument 1: spray identifier.
+* Argument 1: painter identifier.
 * Argument 2: x [0-640]
 * Argument 3: y [0-480]
 * Argument 4: size [0-1000]
@@ -29,7 +29,7 @@ Signature:
 * `/4/raw ,ffffffffffffffffffffff`
 * `/5/raw ,ffffffffffffffffffffff`
 
-The path includes the spray identifier
+The path includes the painter identifier
 
 Arguments:
 * Argument 12: force [0-1023] - If it's > 300, it means it's pressed.
@@ -46,7 +46,7 @@ Signatures:
 * `/color ,iiiii`
 
 Arguments:
-* Argument 1: spray identifier.
+* Argument 1: painter identifier.
 * Argument 2: red [0-255]
 * Argument 3: green [0-255]
 * Argument 4: blue [0-255]
@@ -62,7 +62,7 @@ Signatures:
 * `/brush/weight ,if`
 
 Arguments:
-* Argument 1: spray identifier.
+* Argument 1: painter identifier.
 * Argument 2: brush weight. The default is 100. This will change the size of the brush.
 
 Description:
@@ -75,7 +75,7 @@ Signatures:
 * `/brush/choice ,if`
 
 Arguments:
-* Argument 1: spray identifier.
+* Argument 1: painter identifier.
 * Argument 2: brush choice. Brushes are numbered 0, 1, 2, 3, etc.
 
 Description:
@@ -95,7 +95,7 @@ Arguments:
 
 Description:
 Changes the FSR sensor on/off threshold value.
-It's the same for all spray cans.
+It's the same for all painter.
 
 ## set step size
 
@@ -103,7 +103,7 @@ Signature:
 `/set/step_size, if`
 
 Arguments:
-* Argument 1: spray identifier
+* Argument 1: painter identifier
 
 Description:
 Sets the minimum distance between interpolated positions of nodes. (in pixels)
@@ -114,11 +114,11 @@ Signature:
 `/scale/factor, if`
 
 Arguments:
-* Argument 1: spray identifier
+* Argument 1: painter identifier
 * Argument 2: factor
 
 Description:
-Sets the scale factor (within the range [0,1]) for a spray can.
+Sets the scale factor (within the range [0,1]) for a painter.
 The default is 1.0
 A scale factor of 1.0 means that we use the full sketch area.
 A scale factor of 0.1 means that we can only paint in 1/10 of the sketch area.
@@ -129,12 +129,12 @@ Signature:
 `/scale/center, iff`
 
 Arguments:
-* Argument 1: spray identifier
+* Argument 1: painter identifier
 * Argument 2: center x (in the range [0,1])
 * Argument 3: center y (in the range [0,1])
 
 Description:
-Sets the scale center (within the range [0,1]) for a spray can.
+Sets the scale center (within the range [0,1]) for a painter.
 The default is (0.5, 0.5)
 For the Y scale, 0.0 is the top of the sketch and 1.0 is the bottom.
 For the X scale, 0.0 is the left of the sketch and 1.0 is the right.
@@ -145,13 +145,13 @@ Signature:
 `/layer ,ii`
 
 Arguments:
-* Argument 1: spray identifier
+* Argument 1: painter identifier
 * Argument 2: layer number (within the range [0,9]
 
 Description:
-Sets the layer for a spray can.
-The default for all spray cans is 0.
-If the layer of a spray is 9, it will be drawn over all spray cans whose layer
+Sets the layer for a painter.
+The default for all painters is 0.
+If the layer of a painter is 9, it will be drawn over all painters whose layer
 number if smaller than 9.
 
 ## clear
@@ -160,12 +160,12 @@ Signature:
 /clear ,i
 
 Arguments:
-* Argument 1: spray can index
+* Argument 1: painter index
 
 Description:
-Clears the layers a spray can is on.
+Clears the layers a painter is on.
 
-You might want to first set the layer of a spray can, so that you make sure you clear the right layer.
+You might want to first set the layer of a painter, so that you make sure you clear the right layer.
 
 ## clear layer
 
