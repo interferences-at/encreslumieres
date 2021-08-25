@@ -4,6 +4,7 @@
 class ImageBrush extends Brush {
   ArrayList<PImage> _images;
   private boolean _enable_rotation = true;
+  private final boolean _enable_whitify = true; // Turn all pixels to white
   
   public ImageBrush() {
     super();
@@ -21,7 +22,18 @@ class ImageBrush extends Brush {
    * Loads a image given its file name.
    */
   public void load_image(String image_file_name) {
-    this._images.add(loadImage(image_file_name));
+    PImage image = loadImage(image_file_name);
+    // Make all pixels white and keep only the alpha of the image for the brush:
+    if (_enable_whitify) {
+      int numPixels = image.width * image.height;
+      image.loadPixels();
+      for (int i = 0; i < numPixels; i ++) {
+        color pixel = image.pixels[i];
+        image.pixels[i] = color(255, 255, 255, alpha(pixel));
+      }
+      image.updatePixels();
+    }
+    this._images.add(image);
   }
   
   public final void draw_brush(PGraphics buffer, float x, float y, float size, color tint) {
@@ -44,6 +56,7 @@ class ImageBrush extends Brush {
       buffer.rotate(radians(random(0.0, 360.0)));
     }
     buffer.imageMode(CENTER);
+    // buffer.blendMode(ADD);
     buffer.image(chosen_image, 0, 0, size, size);
     
     buffer.popMatrix();
