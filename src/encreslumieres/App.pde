@@ -131,8 +131,8 @@ class App {
   }
   
   private void _add_one_brush(String image_file_name) {
-    Brush image_brush = new ImageBrush();
-    ((ImageBrush) image_brush).load_image(image_file_name);
+    ImageBrush image_brush = new ImageBrush();
+    image_brush.load_image(image_file_name);
     this._brushes.add(image_brush);
   }
   

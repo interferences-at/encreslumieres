@@ -108,12 +108,12 @@ class Stroke {
         return false;
       }
       if (this._must_draw) {
-        for (Node p: this._nodes) {
+        for (Node node: this._nodes) {
           // draws each node only once, on the pixel buffer
           // if a node is already drawn, it won't add any pixel on the buffer.
           // if this stroke has been already drawn, do not draw and return
-          p.draw_node(buffer, this._brush);
-          p.set_is_drawn(true);
+          node.draw_node(buffer, this._brush);
+          node.set_is_drawn(true);
         }
         this._must_draw = false;
       }
