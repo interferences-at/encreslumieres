@@ -37,4 +37,3 @@ class PointShaderBrush extends Brush {
     //buffer.popStyle();
   }
 }
-

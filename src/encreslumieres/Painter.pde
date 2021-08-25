@@ -1,7 +1,7 @@
 /**
  * Manages one spray can.
  */
-class SprayCan {
+class Painter {
   // constants
   private final float DEFAULT_STEP_SIZE = 1.0; // how many pixels between each brush drawn - interpolated. See PointShaderBrush
   private final float DEFAULT_BRUSH_WEIGHT = 64; // size of the brush in pixels
@@ -27,7 +27,7 @@ class SprayCan {
    * There can be up to a few cans drawing at the same time.
    * Each can sends OSC messages via the Wifi network. (/blob position, /force amount, /color, etc.)
    */
-  public SprayCan(Layer layer) {
+  public Painter(Layer layer) {
     this._strokes = new ArrayList<Stroke>();
     this._layer = layer;
     this._color = color(255, 255, 255, 255);
@@ -114,7 +114,7 @@ class SprayCan {
    * FIXME: each nodes should be drawn only once.
    * Right now, each node is drawn on each frame. This is O(n) where n = number of nodes.
    */
-  public void draw_spraycan() {
+  public void draw_painter() {
     PGraphics buffer = this._layer.get_buffer();
     boolean somethingToDraw = false; // We add to our layer only if we need to.
     buffer.beginDraw();

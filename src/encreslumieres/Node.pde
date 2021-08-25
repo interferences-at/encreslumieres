@@ -79,4 +79,3 @@ class Node extends PVector {
     this._debug = value;
   }
 }
-

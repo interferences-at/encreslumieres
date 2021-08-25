@@ -37,4 +37,3 @@ class StackOfImages {
     return this._amount;
   }
 }
-
