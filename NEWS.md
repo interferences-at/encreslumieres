@@ -1,11 +1,11 @@
 # Encres & Lumieres release notes
 
-## 2021-08-25 - 2.0.0
+## 2021-08-26 - 2.0.0
 - Rename SprayCan to Painter
 - Use the P2D renderer for the layers.
 - Separate the layers from the painters.
 - Remove linked strokes.
-- Remove the undo and the zoom.
+- Remove the undo.
 - Attempt to fix the undesired dark contour effect around each stroke.
 - Refactor of the OSC for the new devices:
 
