@@ -22,6 +22,10 @@ final boolean VERBOSE = false;
 final int FORCE_IF_PRESSED = 800;
 final int FORCE_IF_NOT_PRESSED = 0;
 final float BRUSH_SCALE = 0.3; // FIXME: ratio taken from Knot.pde (not quite right)
+final int NUM_BRUSHES = 13; // How many brushes there are.
+final char FIRST_BRUSH_LETTER = 'a'; // Brushes are chosen via the key a, b, c, d, etc.
+final char ZERO_LETTER = '0'; // Number keys 0-9 choose the painter
+final int NUM_NUMBER_KEYS = 10; // There are 10 number keys, of course.
 
 ControlP5 control_p5;
 ColorPicker color_picker;
@@ -127,46 +131,13 @@ void set_current_identifier(int value)
 
 void keyPressed()
 {
-  if (key == '0')
+  // 0-9: choose the painter
+  if (key >= ZERO_LETTER && key <= (ZERO_LETTER + NUM_NUMBER_KEYS))
   {
-    set_current_identifier(0);
+    int num_identifier = (key - ZERO_LETTER);
+    set_current_identifier(num_identifier);
   }
-  else if (key == '1')
-  {
-    set_current_identifier(1);
-  }
-  else if (key == '2')
-  {
-    set_current_identifier(2);
-  }
-  else if (key == '3')
-  {
-    set_current_identifier(3);
-  }
-  else if (key == '4')
-  {
-    set_current_identifier(4);
-  }
-  else if (key == '5')
-  {
-    set_current_identifier(5);
-  }
-  else if (key == '6')
-  {
-    set_current_identifier(6);
-  }
-  else if (key == '7')
-  {
-    set_current_identifier(7);
-  }
-  else if (key == '8')
-  {
-    set_current_identifier(8);
-  }
-  else if (key == '9')
-  {
-    set_current_identifier(9);
-  }
+  // up/down: increase/decrese brush size
   else if (keyCode == UP)
   {
     increase_brush_weight();
@@ -175,6 +146,35 @@ void keyPressed()
   {
     decrease_brush_weight();
   }
+  // a,b,c,d,... choose the brush
+  else if (key >= FIRST_BRUSH_LETTER && key <= (FIRST_BRUSH_LETTER + NUM_BRUSHES))
+  {
+    int brush_index = (key - FIRST_BRUSH_LETTER);
+    send_brush_choice(brush_index);
+  }
+  else if (key == BACKSPACE) {
+    send_clear_all();
+  }
+}
+
+void send_clear_all() {
+  OscMessage message = new OscMessage("/clear/all");
+  if (VERBOSE)
+  {
+    println("/clear/all");
+  }
+  osc_receiver.send(message, osc_send_address);
+}
+
+void send_brush_choice(int brush_index) {
+  OscMessage message = new OscMessage("/brush/choice");
+  message.add(current_identifier);
+  message.add(brush_index);
+  if (VERBOSE)
+  {
+    println("/brush/choice " + current_identifier + " " + brush_index);
+  }
+  osc_receiver.send(message, osc_send_address);
 }
 
 void increase_brush_weight()
